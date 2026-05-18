@@ -773,8 +773,7 @@ async function signInWithGoogle() {
   state.signingIn = true; render();
 
   const provider = new fb.authMod.GoogleAuthProvider();
-
-  try {
+try {
     // If currently anonymous, upgrade (link) so any local-only data carries over.
     if (fb.auth.currentUser && fb.auth.currentUser.isAnonymous) {
       try {
@@ -782,13 +781,25 @@ async function signInWithGoogle() {
         toast('Signed in with Google');
         return;
       } catch (linkErr) {
-        if (linkErr.code !== 'auth/credential-already-in-use'
-         && linkErr.code !== 'auth/email-already-in-use') throw linkErr;
-        console.warn('Google account already exists — signing into it');
+        if (linkErr.code === 'auth/credential-already-in-use' || linkErr.code === 'auth/email-already-in-use') {
+          console.warn('Google account already exists — extracting credentials to sign in directly');
+          
+          // EXTRACT the credential from the failed linking attempt
+          const credential = fb.authMod.GoogleAuthProvider.credentialFromError(linkErr);
+          
+          // Sign in instantly without triggering a second popup!
+          await fb.authMod.signInWithCredential(fb.auth, credential);
+          toast('Signed in with Google');
+          return;
+        }
+        throw linkErr; // Throw other errors to the main catch block
       }
     }
+    
+    // For users who are completely logged out (not even anonymous)
     await fb.authMod.signInWithPopup(fb.auth, provider);
     toast('Signed in with Google');
+    
   } catch (e) {
     console.error('Google sign-in failed:', e.code, e.message, e);
 
