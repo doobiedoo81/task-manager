@@ -4,6 +4,17 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Daily Planner</title>
+
+<!-- ============= PWA / Add-to-Home-Screen support ============= -->
+<meta name="theme-color" content="#D2542F" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Daily" />
+<meta name="application-name" content="Daily Planner" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23D2542F'/%3E%3Ctext x='90' y='118' font-family='Georgia,serif' font-size='100' font-style='italic' font-weight='600' fill='white' text-anchor='middle'%3ED.%3C/text%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23D2542F'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='58' font-style='italic' font-weight='600' fill='white' text-anchor='middle'%3ED.%3C/text%3E%3C/svg%3E" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -50,6 +61,7 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     transition: background 0.3s, color 0.3s;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   button, input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
   button { cursor: pointer; background: transparent; border: none; padding: 0; }
@@ -57,8 +69,6 @@
   ::placeholder { color: var(--text-faint); }
   .display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; letter-spacing: -0.015em; }
   .mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-  .scroll-area::-webkit-scrollbar { width: 8px; height: 8px; }
-  .scroll-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
   i[data-lucide] { display: inline-flex; vertical-align: middle; width: 1em; height: 1em; }
 
   /* ---------- LAYOUT ---------- */
@@ -233,7 +243,7 @@
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
-  .btn { padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.15s, transform 0.05s; }
+  .btn { padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.15s, transform 0.05s; justify-content: center; }
   .btn:active { transform: scale(0.98); }
   .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover { opacity: 0.92; }
@@ -284,16 +294,18 @@
   }
   .banner .x { margin-left: auto; color: var(--text-dim); padding: 4px; }
 
-  /* ---------- LOADING / ERROR SCREEN ---------- */
+  /* ---------- BOOT / LOADING / ERROR / SIGN-IN SCREENS ---------- */
   .boot-screen {
     display: flex; align-items: center; justify-content: center;
     min-height: 100vh; padding: 20px;
+    background: var(--bg);
   }
   .boot-card {
-    max-width: 480px; width: 100%;
+    max-width: 440px; width: 100%;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 28px;
+    border-radius: 20px; padding: 36px 32px;
     text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.06);
   }
   .boot-card .spinner {
     width: 32px; height: 32px; border-radius: 999px;
@@ -301,7 +313,49 @@
     animation: spin 0.8s linear infinite;
     margin: 0 auto 16px;
   }
+  .boot-logo {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 56px; font-weight: 600; font-style: italic;
+    line-height: 1; letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+  .boot-logo span { color: var(--accent); }
+  .boot-tagline {
+    font-size: 14px; color: var(--text-dim);
+    margin-bottom: 32px;
+  }
+  .google-btn {
+    width: 100%;
+    background: white; color: #1f1f1f;
+    border: 1px solid #dadce0;
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 15px; font-weight: 500;
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+  .google-btn:hover { background: #f8f9fa; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  [data-theme="dark"] .google-btn { background: #fff; color: #1f1f1f; }
+  .google-g {
+    width: 18px; height: 18px; flex-shrink: 0;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- INSTALL BANNER ---------- */
+  .install-banner {
+    background: var(--accent);
+    color: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .install-banner .btn-light {
+    background: white; color: var(--accent);
+    padding: 6px 12px; border-radius: 6px;
+    font-weight: 600; font-size: 12px;
+  }
+  .install-banner .x { color: white; padding: 4px; margin-left: 4px; opacity: 0.8; }
 
   /* ---------- ANIMATIONS ---------- */
   @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
@@ -336,23 +390,14 @@
 // ============================================================
 // FIREBASE CONFIG
 // ============================================================
-// To enable cloud sync across devices:
-//   1. Go to https://console.firebase.google.com and create a project (free)
-//   2. Enable Firestore Database (in test mode is fine to start)
-//   3. Enable Authentication → Sign-in method → Anonymous (also Google if you want cross-device login)
-//   4. Project settings → Add Web App → copy the config object below
-//   5. IMPORTANT: this page must be served over http/https, not file://
-//      Run `python3 -m http.server 8000` in this folder and open http://localhost:8000
-// Until then, the app will fall back to local storage (your data stays in this browser).
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCN9IqNF0-ec7Th1nlJZog3RjUTCjNYN6I",
-  authDomain: "task-manager-39f2b.firebaseapp.com",
-  projectId: "task-manager-39f2b",
-  storageBucket: "task-manager-39f2b.firebasestorage.app",
-  messagingSenderId: "710335364944",
-  appId: "1:710335364944:web:57f3647af30bc73530f655",
-  measurementId: "G-8CHET3WVCK"
+  apiKey: "AIzaSyBydHxxuoofWVXRpjW4JzikZp4q8vIaJDc",
+  authDomain: "task-management-9277c.firebaseapp.com",
+  projectId: "task-management-9277c",
+  storageBucket: "task-management-9277c.firebasestorage.app",
+  messagingSenderId: "521392827703",
+  appId: "1:521392827703:web:9ec3a751f7c920989ffeb2",
+  measurementId: "G-0S7L0H9L23"
 };
 
 const USE_FIREBASE = !firebaseConfig.apiKey.includes('YOUR_');
@@ -365,17 +410,40 @@ if (USE_FIREBASE) {
     const authMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
     const fsMod   = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     const app = appMod.initializeApp(firebaseConfig);
-    fb = {
-      app,
-      auth: authMod.getAuth(app),
-      db:   fsMod.getFirestore(app),
-      authMod, fsMod
-    };
+    fb = { app, auth: authMod.getAuth(app), db: fsMod.getFirestore(app), authMod, fsMod };
   } catch (e) {
     console.error('Firebase init failed:', e);
     fbInitError = e;
   }
 }
+
+// ============================================================
+// PWA MANIFEST (injected as blob URL — keeps everything in one file)
+// ============================================================
+(function setupPWAManifest() {
+  const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="115" fill="#D2542F"/><text x="256" y="345" font-family="Georgia,serif" font-size="280" font-style="italic" font-weight="600" fill="white" text-anchor="middle">D.</text></svg>`;
+  const iconUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(iconSvg);
+  const manifest = {
+    name: 'Daily Planner',
+    short_name: 'Daily',
+    description: 'A personal journal & task planner',
+    start_url: location.pathname + location.search,
+    scope: location.pathname.replace(/[^/]+$/, ''),
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#F8F5EE',
+    theme_color: '#D2542F',
+    icons: [
+      { src: iconUrl, sizes: '192x192 512x512 any', type: 'image/svg+xml', purpose: 'any maskable' },
+    ],
+  };
+  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = url;
+  document.head.appendChild(link);
+})();
 
 // ============================================================
 // CONSTANTS
@@ -410,7 +478,7 @@ const DEFAULT_SETTINGS = {
   accent: 'coral',
   notificationsEnabled: false,
   displayName: '',
-  hideFirebaseBanner: false,
+  hideInstallBanner: false,
 };
 
 const NAV_ITEMS = [
@@ -438,6 +506,14 @@ const fmtDate = (d, style='medium') => {
 };
 const fmtTime = (t) => { if (!t) return ''; const [h, m] = t.split(':'); const d = new Date(); d.setHours(+h, +m); return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); };
 const greeting = () => { const h = new Date().getHours(); if (h<5) return 'Working late'; if (h<12) return 'Good morning'; if (h<17) return 'Good afternoon'; if (h<21) return 'Good evening'; return 'Good night'; };
+
+const isStandaloneInstalled = () =>
+  window.matchMedia('(display-mode: standalone)').matches ||
+  window.navigator.standalone === true;
+
+const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
+const isAndroid = () => /Android/i.test(navigator.userAgent);
+const isMobile = () => isIOS() || isAndroid() || window.innerWidth < 760;
 
 function buildICS(tasks) {
   const pad = (n) => String(n).padStart(2,'0');
@@ -477,37 +553,8 @@ function toast(msg, kind='') {
 }
 
 // ============================================================
-// SAMPLE SEED DATA (first run)
-// ============================================================
-function buildSampleData() {
-  const t = todayYMD(), tm = tomorrowYMD();
-  const yest = (() => { const d = new Date(); d.setDate(d.getDate()-1); return ymd(d); })();
-  return {
-    entries: [
-      { id: uid(), date: t,    time: '09:15', title: 'Morning standup',         description: 'Discussed Q3 roadmap. Team is aligned on shipping the new dashboard by Friday.', category: 'work',     mood: 'good'  },
-      { id: uid(), date: t,    time: '12:30', title: 'Lunch + walk',             description: 'Tried the new ramen place near the office. Great broth, will go back.',          category: 'personal', mood: 'great' },
-      { id: uid(), date: t,    time: '15:00', title: 'Code review session',     description: 'Reviewed three PRs. Caught a subtle race condition in the auth flow.',          category: 'work',     mood: 'good'  },
-      { id: uid(), date: yest, time: '18:00', title: 'Gym — leg day',           description: 'Squats up 5kg. Soreness incoming.',                                              category: 'health',   mood: 'great' },
-    ],
-    tasks: [
-      { id: uid(), dueDate: tm, dueTime: '09:00', title: 'Finish quarterly report draft',     description: 'Focus on the growth metrics section. Pull numbers from the analytics dashboard.', category: 'work',    priority: 'high',   completed: false, reminder: true  },
-      { id: uid(), dueDate: tm, dueTime: '11:30', title: 'Call with Maya about design system', description: 'Discuss the new token structure and migration plan.',                              category: 'work',    priority: 'medium', completed: false, reminder: true  },
-      { id: uid(), dueDate: tm, dueTime: '14:00', title: 'Dentist appointment',                description: 'Cleaning + checkup. Address is on the reminder email.',                            category: 'health',  priority: 'high',   completed: false, reminder: true  },
-      { id: uid(), dueDate: tm, dueTime: '',      title: 'Pick up dry cleaning',                description: '',                                                                                  category: 'errands', priority: 'low',    completed: false, reminder: false },
-      { id: uid(), dueDate: tm, dueTime: '19:00', title: 'Read 30 pages — current book',        description: 'Currently on chapter 7. Want to finish part one this week.',                       category: 'learn',   priority: 'low',    completed: false, reminder: false },
-      { id: uid(), dueDate: t,  dueTime: '17:00', title: 'Reply to client email',               description: 'Send updated quote and timeline.',                                                  category: 'work',    priority: 'medium', completed: true,  reminder: false },
-    ],
-  };
-}
-
-// ============================================================
 // STORAGE LAYER
 // ============================================================
-// Three modes, chosen automatically:
-//   - 'firebase': real cloud sync via Firestore (preferred)
-//   - 'artifact': window.storage (when running inside Claude artifact preview)
-//   - 'local':    localStorage (when running as plain HTML without Firebase)
-
 const STORAGE_KEY = 'dailyPlanner.v1';
 
 let storageMode = 'local';
@@ -523,7 +570,6 @@ async function storageLoad() {
     try { const res = await window.storage.get(STORAGE_KEY); return res ? JSON.parse(res.value) : null; }
     catch { return null; }
   }
-  // firebase loads through onSnapshot, not here
   return null;
 }
 
@@ -536,7 +582,7 @@ async function storageSave(data) {
     try { await window.storage.set(STORAGE_KEY, JSON.stringify(data)); } catch (e) { console.error(e); }
     return;
   }
-  if (storageMode === 'firebase' && state.user) {
+  if (storageMode === 'firebase' && state.user && !state.user.isAnonymous) {
     try {
       const ref = fb.fsMod.doc(fb.db, 'users', state.user.uid);
       await fb.fsMod.setDoc(ref, data, { merge: true });
@@ -549,7 +595,7 @@ async function storageSave(data) {
 // ============================================================
 const state = {
   view: 'dashboard',
-  modal: null,         // { type, edit }
+  modal: null,
   search: '',
   taskFilter: 'all',
   taskCatFilter: 'all',
@@ -559,14 +605,15 @@ const state = {
 
   user: null,
   loaded: false,
-  bootError: null,     // populated when Firebase init fails so we can show a useful screen
+  signingIn: false,
+  bootError: null,
+  installPrompt: null,
 
   data: {
     settings: { ...DEFAULT_SETTINGS },
     categories: DEFAULT_CATEGORIES.slice(),
     entries: [],
     tasks: [],
-    seeded: false,
   },
 };
 
@@ -575,12 +622,8 @@ function applyTheme() {
   document.body.setAttribute('data-accent', state.data.settings.accent || 'coral');
 }
 
-async function persist() {
-  await storageSave(state.data);
-}
-
+async function persist() { await storageSave(state.data); }
 function setView(v) { state.view = v; state.modal = null; render(); }
-function setState(patch) { Object.assign(state, patch); render(); }
 
 // CRUD
 function upsertEntry(e) {
@@ -615,30 +658,26 @@ function updateCategories(cats) {
 }
 
 // ============================================================
-// AUTH (Firebase)
+// AUTH (Firebase) — anonymous users see a sign-in gate
 // ============================================================
 async function initFirebaseAuth() {
   if (!fb) return;
-  
-  // Handle redirect results before setting up listener
-  try {
-    await fb.authMod.getRedirectResult(fb.auth);
-  } catch (e) {
-    console.error('Redirect result error:', e);
-  }
-  
+
+  // Complete any pending redirect-based sign-in from a prior page load
+  try { await fb.authMod.getRedirectResult(fb.auth); } catch (e) { console.error('Redirect result:', e); }
+
   return new Promise((resolve) => {
     let resolved = false;
     const done = () => { if (!resolved) { resolved = true; resolve(); } };
+
     fb.authMod.onAuthStateChanged(fb.auth, async (user) => {
       if (!user) {
+        // No user yet — sign in anonymously so we have a session
+        // The UI will still gate them at the sign-in screen until they upgrade.
         try {
           await fb.authMod.signInAnonymously(fb.auth);
         } catch (e) {
           console.error('Anonymous sign-in failed:', e);
-          // Common cause: Anonymous sign-in isn't enabled in Firebase console,
-          // or this page is opened via file:// instead of http(s)://, or the
-          // current domain isn't in the Authorized domains list.
           state.bootError = {
             title: 'Could not sign in to Firebase',
             message: friendlyAuthError(e),
@@ -653,7 +692,16 @@ async function initFirebaseAuth() {
 
       state.user = user;
 
-      // subscribe to user doc
+      // Anonymous user → show the sign-in gate, don't subscribe to Firestore yet
+      if (user.isAnonymous) {
+        state.loaded = true;
+        state.bootError = null;
+        render();
+        done();
+        return;
+      }
+
+      // Authenticated user — subscribe to their data
       const ref = fb.fsMod.doc(fb.db, 'users', user.uid);
       fb.fsMod.onSnapshot(ref, (snap) => {
         if (snap.exists()) {
@@ -663,17 +711,14 @@ async function initFirebaseAuth() {
             categories: d.categories || DEFAULT_CATEGORIES.slice(),
             entries:    d.entries || [],
             tasks:      d.tasks || [],
-            seeded:     !!d.seeded,
           };
         } else {
-          // first-time user, seed
-          const sample = buildSampleData();
+          // First-time signed-in user — start with empty data
           state.data = {
             settings: { ...DEFAULT_SETTINGS },
             categories: DEFAULT_CATEGORIES.slice(),
-            entries: sample.entries,
-            tasks: sample.tasks,
-            seeded: true,
+            entries: [],
+            tasks: [],
           };
           persist();
         }
@@ -684,7 +729,6 @@ async function initFirebaseAuth() {
         done();
       }, (err) => {
         console.error('Snapshot error:', err);
-        // Common cause: Firestore not created yet, or security rules deny reads.
         state.bootError = {
           title: 'Could not read your data',
           message: friendlyFirestoreError(err),
@@ -701,61 +745,53 @@ async function initFirebaseAuth() {
 function friendlyAuthError(e) {
   const code = (e && e.code) || '';
   if (code === 'auth/operation-not-allowed' || code === 'auth/admin-restricted-operation') {
-    return 'Anonymous sign-in isn\'t enabled. In the Firebase console, go to Authentication → Sign-in method, and enable Anonymous.';
+    return 'Anonymous sign-in isn\'t enabled. In Firebase console, go to Authentication → Sign-in method, and enable Anonymous.';
   }
   if (code === 'auth/unauthorized-domain') {
-    return 'This domain isn\'t authorized. In the Firebase console, go to Authentication → Settings → Authorized domains and add it (e.g. "localhost").';
+    return 'This domain isn\'t authorized. In Firebase console, go to Authentication → Settings → Authorized domains and add it (e.g. "localhost").';
   }
   if (code === 'auth/network-request-failed') {
-    return 'Network request failed. If you opened this file with a file:// path, that won\'t work — serve it over http(s) instead (e.g. python3 -m http.server 8000).';
+    return 'Network request failed. If you opened this file with a file:// path, that won\'t work — serve it over http(s) instead.';
   }
-  return (e && e.message) || 'Unknown error. Check the browser console for details.';
+  return (e && e.message) || 'Unknown error. Check the browser console.';
 }
 
 function friendlyFirestoreError(e) {
   const code = (e && e.code) || '';
   if (code === 'permission-denied') {
-    return 'Firestore denied the request. Either the database is in production-mode without matching rules, or rules block this user. Paste the starter rules from the bottom of this file\'s source.';
+    return 'Firestore denied the request. Set up the security rules in your Firebase console (the rule snippet is at the bottom of this file\'s source).';
   }
-  if (code === 'unavailable') {
-    return 'Firestore is unreachable. Check that the database was actually created in the Firebase console.';
-  }
+  if (code === 'unavailable') return 'Firestore is unreachable. Check that the database was created in the Firebase console.';
   if (code === 'failed-precondition' || code === 'not-found') {
-    return 'No Firestore database exists for this project yet. In the Firebase console: Build → Firestore Database → Create database.';
+    return 'No Firestore database exists yet. In Firebase console: Build → Firestore Database → Create database.';
   }
-  return (e && e.message) || 'Unknown Firestore error. Check the browser console.';
+  return (e && e.message) || 'Unknown Firestore error.';
 }
 
 async function signInWithGoogle() {
   if (!fb) return;
+  state.signingIn = true; render();
+
   const provider = new fb.authMod.GoogleAuthProvider();
 
   try {
-    // If currently anonymous, upgrade (link) so existing data carries over.
+    // If currently anonymous, upgrade (link) so any local-only data carries over.
     if (fb.auth.currentUser && fb.auth.currentUser.isAnonymous) {
       try {
         await fb.authMod.linkWithPopup(fb.auth.currentUser, provider);
-        toast('Signed in with Google — your data carried over');
+        toast('Signed in with Google');
         return;
       } catch (linkErr) {
-        // If that Google account already exists in this project, fall through
-        // to regular sign-in so the user can still get into their account.
         if (linkErr.code !== 'auth/credential-already-in-use'
-         && linkErr.code !== 'auth/email-already-in-use') {
-          throw linkErr;
-        }
-        console.warn('Google account already exists — signing into it instead. Anonymous data will not carry over.');
-        toast('That Google account already exists — signing in to it');
+         && linkErr.code !== 'auth/email-already-in-use') throw linkErr;
+        console.warn('Google account already exists — signing into it');
       }
     }
-
     await fb.authMod.signInWithPopup(fb.auth, provider);
     toast('Signed in with Google');
-
   } catch (e) {
     console.error('Google sign-in failed:', e.code, e.message, e);
 
-    // If the popup itself is the problem, try the redirect flow as a fallback.
     if (e.code === 'auth/popup-blocked'
      || e.code === 'auth/popup-closed-by-user'
      || e.code === 'auth/cancelled-popup-request') {
@@ -771,9 +807,58 @@ async function signInWithGoogle() {
     if (e.code === 'auth/unauthorized-domain') {
       toast('Add this domain to Firebase → Auth → Authorized domains', 'error');
     } else {
-      toast('Sign-in failed: ' + (e.code || 'unknown — see console'), 'error');
+      toast('Sign-in failed: ' + (e.code || 'see console'), 'error');
     }
+  } finally {
+    state.signingIn = false;
+    render();
   }
+}
+
+async function signOutUser() {
+  if (!fb) return;
+  await fb.authMod.signOut(fb.auth);
+  // Reset local view state — auth listener will pick up the new (anonymous) user
+  state.data = {
+    settings: { ...DEFAULT_SETTINGS },
+    categories: DEFAULT_CATEGORIES.slice(),
+    entries: [],
+    tasks: [],
+  };
+  toast('Signed out');
+}
+
+// ============================================================
+// PWA INSTALL HANDLING
+// ============================================================
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  state.installPrompt = e;
+  render();
+});
+
+window.addEventListener('appinstalled', () => {
+  state.installPrompt = null;
+  toast('App installed');
+  render();
+});
+
+async function triggerInstall() {
+  if (state.installPrompt) {
+    state.installPrompt.prompt();
+    const { outcome } = await state.installPrompt.userChoice;
+    if (outcome === 'accepted') toast('Installing…');
+    state.installPrompt = null;
+    render();
+    return;
+  }
+  // No native prompt available — show manual instructions
+  showInstallInstructions();
+}
+
+function showInstallInstructions() {
+  state.modal = { type: 'install' };
+  render();
 }
 
 // ============================================================
@@ -814,10 +899,16 @@ async function requestNotifications() {
 // ICONS
 // ============================================================
 const ICON = (name, attrs='') => `<i data-lucide="${name}" ${attrs}></i>`;
+function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
 
-function refreshIcons() {
-  if (window.lucide) window.lucide.createIcons();
-}
+// Google "G" SVG (for the sign-in button)
+const GOOGLE_G_SVG = `
+<svg class="google-g" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+  <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+  <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+  <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
+  <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+</svg>`;
 
 // ============================================================
 // RENDER — TOP LEVEL
@@ -830,8 +921,8 @@ function render() {
       <div class="boot-screen">
         <div class="boot-card">
           <div class="spinner"></div>
-          <div style="font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:6px">Loading your planner…</div>
-          <div style="color:var(--text-dim);font-size:13px">Connecting to ${storageMode === 'firebase' ? 'Firebase' : 'local storage'}</div>
+          <div class="boot-logo">Daily<span>.</span></div>
+          <div style="color:var(--text-dim);font-size:13px">Loading…</div>
         </div>
       </div>`;
     return;
@@ -850,10 +941,6 @@ function render() {
           ${state.bootError.code ? `<div class="mono" style="font-size:12px;color:var(--text-dim);background:var(--surface-2);padding:8px 10px;border-radius:6px;margin-bottom:14px">code: ${esc(state.bootError.code)}</div>` : ''}
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-primary" data-action="reload">Reload</button>
-            <button class="btn btn-ghost" data-action="continue-offline">Continue with local storage</button>
-          </div>
-          <div style="font-size:12px;color:var(--text-faint);margin-top:14px;line-height:1.5">
-            Tip: open the browser console (⌘⌥I / Ctrl+Shift+I) for the full error.
           </div>
         </div>
       </div>`;
@@ -861,10 +948,19 @@ function render() {
     return;
   }
 
+  // -------- SIGN-IN GATE for anonymous users --------
+  if (storageMode === 'firebase' && state.user && state.user.isAnonymous) {
+    document.getElementById('mobile-nav')?.remove();
+    document.getElementById('fab')?.remove();
+    app.innerHTML = renderSignInGate();
+    refreshIcons();
+    return;
+  }
+
   const main = renderMain();
   app.innerHTML = `${renderSidebar()}${main}`;
 
-  // mobile nav lives outside the grid
+  // mobile nav
   let mn = document.getElementById('mobile-nav');
   if (!mn) {
     mn = document.createElement('nav');
@@ -897,7 +993,50 @@ function render() {
   scheduleReminders();
 }
 
+// ============================================================
+// SIGN-IN GATE
+// ============================================================
+function renderSignInGate() {
+  const installable = state.installPrompt || (isIOS() && !isStandaloneInstalled());
+  return `
+    <div class="boot-screen">
+      <div class="boot-card anim-slide">
+        <div class="boot-logo">Daily<span>.</span></div>
+        <div class="boot-tagline">Your personal journal &amp; task planner</div>
+
+        ${state.signingIn ? `
+          <button class="google-btn" disabled style="opacity:0.7">
+            <div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0"></div>
+            Signing in…
+          </button>
+        ` : `
+          <button class="google-btn" data-action="google-signin">
+            ${GOOGLE_G_SVG}
+            Continue with Google
+          </button>
+        `}
+
+        <div style="font-size:12px;color:var(--text-faint);margin-top:18px;line-height:1.5">
+          Sign in to sync your data across devices. Your tasks and journal entries stay private to you.
+        </div>
+
+        ${installable ? `
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+            <button class="btn btn-ghost" data-action="trigger-install" style="width:100%">
+              ${ICON('download')} Install as app
+            </button>
+            <div style="font-size:11px;color:var(--text-faint);margin-top:8px">
+              Add Daily to your home screen for a full-screen experience
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+}
+
 function renderSidebar() {
+  const displayName = state.user?.displayName || state.user?.email?.split('@')[0] || 'You';
   return `
     <aside class="sidebar">
       <div class="brand">
@@ -909,7 +1048,10 @@ function renderSidebar() {
           ${ICON(n.icon)} ${n.label}
         </button>
       `).join('')}
-      <div class="credit">${storageMode === 'firebase' ? '☁ Synced via Firebase' : storageMode === 'artifact' ? 'Saved in artifact' : '💾 Saved locally'} · v1.0</div>
+      <div class="credit">
+        Signed in as <strong style="color:var(--text-dim)">${esc(displayName)}</strong><br>
+        ☁ Synced via Firebase
+      </div>
     </aside>
   `;
 }
@@ -957,7 +1099,6 @@ function renderDashboard() {
   const completion = todayTasks.length > 0 ? Math.round((todayDone / todayTasks.length) * 100) : 0;
   const remaining = todayTasks.filter(t2 => !t2.completed).length;
 
-  // 7-day sparkline
   const days = [];
   for (let i = 6; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
@@ -968,12 +1109,21 @@ function renderDashboard() {
   }
   const maxH = Math.max(...days.map(d => d.total), 3);
 
+  const showInstallBanner =
+    !state.data.settings.hideInstallBanner &&
+    !isStandaloneInstalled() &&
+    (state.installPrompt || isIOS());
+
   return `
-    ${storageMode !== 'firebase' && !state.data.settings.hideFirebaseBanner ? `
-      <div class="banner">
-        ${ICON('cloud')}
-        <span><strong>Want to sync across devices?</strong> Set up Firebase (free) — see <a href="#" data-action="nav" data-view="settings">Settings → Data</a> for the steps.</span>
-        <button class="x" data-action="hide-banner">${ICON('x')}</button>
+    ${showInstallBanner ? `
+      <div class="install-banner anim-slide">
+        ${ICON('smartphone')}
+        <div style="flex:1">
+          <strong>Install Daily on your phone</strong><br>
+          <span style="opacity:0.85;font-size:12px">Get a full-screen app experience</span>
+        </div>
+        <button class="btn-light" data-action="trigger-install">Install</button>
+        <button class="x" data-action="hide-install-banner">${ICON('x')}</button>
       </div>
     ` : ''}
 
@@ -981,7 +1131,10 @@ function renderDashboard() {
 
       <section class="hero anim-slide">
         <div class="greeting">${esc(greeting())}${state.data.settings.displayName ? ', '+esc(state.data.settings.displayName) : ''}.</div>
-        <h2 class="display">You have <em>${remaining}</em> ${remaining === 1 ? 'thing' : 'things'} left today${tomorrowTasks.length > 0 ? `, and <em>${tomorrowTasks.length}</em> waiting for tomorrow.` : '.'}</h2>
+        <h2 class="display">${state.data.tasks.length === 0 && state.data.entries.length === 0
+          ? `Your planner is <em>empty</em>. Tap the + button to begin.`
+          : `You have <em>${remaining}</em> ${remaining === 1 ? 'thing' : 'things'} left today${tomorrowTasks.length > 0 ? `, and <em>${tomorrowTasks.length}</em> waiting for tomorrow.` : '.'}`}
+        </h2>
       </section>
 
       <section class="grid-stats">
@@ -1001,7 +1154,7 @@ function renderDashboard() {
             <button class="card-link" data-action="nav" data-view="tasks">View all →</button>
           </header>
           ${todayTasks.length === 0
-            ? `<div class="empty"><div class="desc">Nothing scheduled for today — a rare moment of calm.</div></div>`
+            ? `<div class="empty"><div class="desc">Nothing scheduled for today. Tap + to add a task.</div></div>`
             : `<div class="stack-sm">${todayTasks.slice(0, 5).map(t2 => taskRowHTML(t2, true)).join('')}</div>`}
         </div>
 
@@ -1024,8 +1177,7 @@ function renderDashboard() {
                     </div>
                   </div>
                   <div class="mono" style="font-size:10px;color:${i === 6 ? 'var(--accent)' : 'var(--text-dim)'};font-weight:${i === 6 ? 700 : 500}">${d.label}</div>
-                </div>
-              `;
+                </div>`;
             }).join('')}
           </div>
         </div>
@@ -1040,7 +1192,7 @@ function renderDashboard() {
           <button class="card-link" data-action="nav" data-view="tasks">Plan day →</button>
         </header>
         ${tomorrowTasks.length === 0
-          ? `<div class="empty"><div class="desc">Tomorrow's still blank — tap the + button to plan ahead.</div></div>`
+          ? `<div class="empty"><div class="desc">Tomorrow's still blank — tap + to plan ahead.</div></div>`
           : `<div class="stack-sm">${tomorrowTasks.map(t2 => taskRowHTML(t2, true)).join('')}</div>`}
       </section>
 
@@ -1053,7 +1205,7 @@ function renderDashboard() {
           <button class="card-link" data-action="nav" data-view="journal">Open journal →</button>
         </header>
         ${todayEntries.length === 0
-          ? `<div class="empty"><div class="desc">No entries yet today. Tap the + button to log something.</div></div>`
+          ? `<div class="empty"><div class="desc">No entries yet today. Tap + to log something.</div></div>`
           : `<div class="stack-sm">${todayEntries.slice(0, 3).map(entryCardHTML).join('')}</div>`}
       </section>
 
@@ -1067,8 +1219,7 @@ function statCard(icon, label, value, sub, delay) {
       <div class="label">${ICON(icon)} ${esc(label)}</div>
       <div class="value display">${esc(String(value))}</div>
       <div class="sub">${esc(sub)}</div>
-    </div>
-  `;
+    </div>`;
 }
 
 // ============================================================
@@ -1085,7 +1236,6 @@ function renderJournal() {
         <div class="spacer"></div>
         <div style="font-size:12px;color:var(--text-dim)">${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}</div>
       </div>
-
       ${entries.length === 0 ? `
         <div class="empty">
           ${ICON('book-open')}
@@ -1093,12 +1243,9 @@ function renderJournal() {
           <div class="desc">Tap the + button to add a moment.</div>
         </div>
       ` : `
-        <div class="timeline stack-sm" style="gap:16px">
-          ${entries.map(entryCardHTML).join('')}
-        </div>
+        <div class="timeline stack-sm" style="gap:16px">${entries.map(entryCardHTML).join('')}</div>
       `}
-    </div>
-  `;
+    </div>`;
 }
 
 function entryCardHTML(entry) {
@@ -1121,8 +1268,7 @@ function entryCardHTML(entry) {
           <button class="icon-btn" style="width:32px;height:32px;background:transparent;border:none;color:var(--text-dim)" data-action="delete-entry" data-id="${entry.id}">${ICON('trash-2')}</button>
         </div>
       </div>
-    </article>
-  `;
+    </article>`;
 }
 
 // ============================================================
@@ -1131,7 +1277,7 @@ function entryCardHTML(entry) {
 function renderTasks() {
   const today = todayYMD(), tm = tomorrowYMD();
   let list = state.data.tasks.slice();
-  if (state.taskFilter === 'today')    list = list.filter(t => t.dueDate === today && !t.completed);
+  if (state.taskFilter === 'today')         list = list.filter(t => t.dueDate === today && !t.completed);
   else if (state.taskFilter === 'tomorrow') list = list.filter(t => t.dueDate === tm && !t.completed);
   else if (state.taskFilter === 'overdue')  list = list.filter(t => !t.completed && t.dueDate < today);
   else if (state.taskFilter === 'done')     list = list.filter(t => t.completed);
@@ -1161,7 +1307,6 @@ function renderTasks() {
         </select>
         <button class="pill" data-action="export-ics" title="Export to Google/Apple Calendar">${ICON('download')} Export .ics</button>
       </div>
-
       ${list.length === 0 ? `
         <div class="empty">
           ${ICON('list-todo')}
@@ -1182,8 +1327,7 @@ function renderTasks() {
           `).join('')}
         </div>
       `}
-    </div>
-  `;
+    </div>`;
 }
 
 function taskRowHTML(task, compact) {
@@ -1211,8 +1355,7 @@ function taskRowHTML(task, compact) {
           <button data-action="delete-task" data-id="${task.id}">${ICON('trash-2')}</button>
         </div>
       ` : ''}
-    </div>
-  `;
+    </div>`;
 }
 
 // ============================================================
@@ -1242,7 +1385,6 @@ function renderCalendar() {
         <h2 class="display" style="margin:0;font-size:22px;font-weight:600">${esc(cursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))}</h2>
         <button class="icon-btn" data-action="cal-next">${ICON('chevron-right')}</button>
       </div>
-
       <div class="card" style="margin-bottom:16px">
         <div class="cal-grid" style="margin-bottom:8px">
           ${['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d => `<div class="day-label">${d}</div>`).join('')}
@@ -1264,12 +1406,10 @@ function renderCalendar() {
                   }).join('')}
                   ${data.entries.length > 0 ? `<span style="background:var(--text-dim)"></span>` : ''}
                 </div>` : ''}
-              </button>
-            `;
+              </button>`;
           }).join('')}
         </div>
       </div>
-
       <div class="card">
         <header>
           <div>
@@ -1294,8 +1434,7 @@ function renderCalendar() {
           </div>
         `}
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 // ============================================================
@@ -1339,8 +1478,7 @@ function renderHistory() {
           `).join('')}
         </div>
       `}
-    </div>
-  `;
+    </div>`;
 }
 
 // ============================================================
@@ -1348,6 +1486,7 @@ function renderHistory() {
 // ============================================================
 function renderSettings() {
   const s = state.data.settings;
+  const installed = isStandaloneInstalled();
   return `
     <div style="max-width:700px" class="col-stack">
 
@@ -1377,6 +1516,40 @@ function renderSettings() {
           <input type="text" class="input" placeholder="Optional" value="${esc(s.displayName || '')}" data-action="set-name" />
           <div class="hint">Used in the greeting on the dashboard.</div>
         </div>
+      </div>
+
+      <div class="card">
+        <header><h3>Install as app</h3></header>
+        <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;line-height:1.6">
+          ${installed
+            ? `<strong style="color:var(--accent)">✓ App is installed.</strong> You're using Daily in standalone mode.`
+            : `Install Daily to your home screen for a faster, full-screen experience. Works offline once installed.`}
+        </div>
+        ${!installed ? `
+          <button class="btn btn-primary" data-action="trigger-install">${ICON('download')} Install app</button>
+          <details style="margin-top:14px">
+            <summary style="cursor:pointer;font-weight:600;font-size:13px">Manual install instructions</summary>
+            <div style="font-size:13px;color:var(--text-dim);line-height:1.7;padding:8px 0">
+              <strong>iPhone / iPad (Safari):</strong>
+              <ol style="padding-left:20px;margin:6px 0">
+                <li>Tap the <strong>Share</strong> button (square with up-arrow) at the bottom</li>
+                <li>Scroll down and tap <strong>Add to Home Screen</strong></li>
+                <li>Tap <strong>Add</strong> — Daily appears on your home screen</li>
+              </ol>
+              <strong>Android (Chrome):</strong>
+              <ol style="padding-left:20px;margin:6px 0">
+                <li>Tap the three-dot menu in the top right</li>
+                <li>Tap <strong>Install app</strong> or <strong>Add to Home screen</strong></li>
+                <li>Confirm and you're done</li>
+              </ol>
+              <strong>Desktop (Chrome/Edge):</strong>
+              <ol style="padding-left:20px;margin:6px 0">
+                <li>Look for the install icon in the address bar (a monitor with a down-arrow)</li>
+                <li>Click it and confirm</li>
+              </ol>
+            </div>
+          </details>
+        ` : ''}
       </div>
 
       <div class="card">
@@ -1410,53 +1583,21 @@ function renderSettings() {
       </div>
 
       <div class="card">
-        <header><h3>Data &amp; Sync</h3></header>
-        <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;line-height:1.6">
-          ${storageMode === 'firebase'
-            ? `<strong style="color:var(--accent)">✓ Connected to Firebase.</strong> Your data syncs in real time across every device signed in with the same account.`
-            : storageMode === 'artifact'
-            ? `Currently saving inside this preview. To sync across devices, follow the Firebase setup below.`
-            : `Saving in this browser's local storage. To sync across devices, set up Firebase (free).`}
+        <header><h3>Account</h3></header>
+        <div style="font-size:13px;margin-bottom:14px">
+          Signed in as: <strong>${esc(state.user?.email || state.user?.displayName || 'User')}</strong>
         </div>
-
-        ${storageMode === 'firebase' ? `
-          <div class="stack-sm" style="margin-bottom:14px">
-            <div style="font-size:13px">
-              Signed in as: <strong>${esc(state.user?.isAnonymous ? 'Anonymous user' : state.user?.email || state.user?.displayName || 'User')}</strong>
-            </div>
-            <div style="display:flex;gap:8px">
-              ${state.user?.isAnonymous ? `<button class="btn btn-primary" data-action="google-signin">${ICON('log-in')} Sign in with Google</button>` : ''}
-              <button class="btn btn-ghost" data-action="signout">${ICON('log-out')} Sign out</button>
-            </div>
-            <div class="hint">Signing in with Google lets you access your data on other devices.</div>
-          </div>
-        ` : `
-          <details style="margin-bottom:14px">
-            <summary style="cursor:pointer;font-weight:600;font-size:13px;margin-bottom:8px">How to enable Firebase sync</summary>
-            <ol style="font-size:13px;color:var(--text-dim);line-height:1.7;padding-left:20px;margin-top:8px">
-              <li>Go to <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> and create a free project.</li>
-              <li>In <strong>Build → Firestore Database</strong>, click <em>Create database</em> (start in test mode for now).</li>
-              <li>In <strong>Build → Authentication → Sign-in method</strong>, enable <em>Anonymous</em>. (Optional: also enable <em>Google</em> for cross-device login.)</li>
-              <li>In <strong>Project settings → General</strong>, scroll to "Your apps", click the web icon <code>&lt;/&gt;</code> and register a web app.</li>
-              <li>Copy the <code>firebaseConfig</code> object Firebase shows you.</li>
-              <li>Open this HTML file, find the <code>firebaseConfig</code> near the top of the &lt;script&gt; tag, and paste your config over the placeholder.</li>
-              <li>Serve the file over http (Firebase Auth doesn't work over file://). Quickest way: in this folder, run <code>python3 -m http.server 8000</code> and open <code>http://localhost:8000</code>.</li>
-            </ol>
-            <div style="font-size:12px;color:var(--text-faint);margin-top:10px">For production use, switch Firestore from "test mode" to rules that allow each user to read/write only their own document. A safe starter rule is included in the comments at the bottom of this file's source.</div>
-          </details>
-        `}
-
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-ghost" data-action="export-json">${ICON('download')} Download backup (.json)</button>
+          <button class="btn btn-ghost" data-action="signout">${ICON('log-out')} Sign out</button>
+          <button class="btn btn-ghost" data-action="export-json">${ICON('download')} Download backup</button>
           <button class="btn btn-ghost" data-action="import-json">${ICON('upload')} Import backup</button>
         </div>
       </div>
 
       <div style="font-size:12px;color:var(--text-faint);text-align:center;padding:20px">
-        Daily Planner · A personal journal &amp; task manager · Built with vanilla HTML + Firebase
+        Daily Planner · A personal journal &amp; task manager
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
 // ============================================================
@@ -1465,6 +1606,58 @@ function renderSettings() {
 function renderModal() {
   const root = document.getElementById('modal-root');
   if (!state.modal) { root.innerHTML = ''; return; }
+
+  if (state.modal.type === 'install') {
+    root.innerHTML = `
+      <div class="modal-overlay" data-action="close-modal">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width:420px">
+          <header>
+            <h2>Install Daily</h2>
+            <button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button>
+          </header>
+          <div class="body">
+            ${isIOS() ? `
+              <div style="font-size:14px;line-height:1.7">
+                <strong>To install on iPhone/iPad:</strong>
+                <ol style="padding-left:20px;margin-top:10px">
+                  <li>Tap the <strong>Share</strong> button ${ICON('share')} at the bottom of Safari</li>
+                  <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                  <li>Tap <strong>Add</strong> in the top right</li>
+                </ol>
+                <div style="margin-top:14px;font-size:13px;color:var(--text-dim)">
+                  Note: This only works in Safari, not Chrome or other browsers on iOS.
+                </div>
+              </div>
+            ` : isAndroid() ? `
+              <div style="font-size:14px;line-height:1.7">
+                <strong>To install on Android:</strong>
+                <ol style="padding-left:20px;margin-top:10px">
+                  <li>Tap the <strong>three-dot menu</strong> ${ICON('more-vertical')} in the top right</li>
+                  <li>Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong></li>
+                  <li>Confirm</li>
+                </ol>
+              </div>
+            ` : `
+              <div style="font-size:14px;line-height:1.7">
+                <strong>To install on desktop:</strong>
+                <ol style="padding-left:20px;margin-top:10px">
+                  <li>Look for the <strong>install icon</strong> ${ICON('download')} in your browser's address bar</li>
+                  <li>Click it and confirm</li>
+                </ol>
+                <div style="margin-top:14px;font-size:13px;color:var(--text-dim)">
+                  Available in Chrome, Edge, and other Chromium-based browsers.
+                </div>
+              </div>
+            `}
+            <div class="footer-row">
+              <button class="btn btn-primary" data-action="close-modal">Got it</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    refreshIcons();
+    return;
+  }
 
   if (state.modal.type === 'entry') {
     const editing = state.modal.edit;
@@ -1530,8 +1723,7 @@ function renderModal() {
             </form>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
     refreshIcons();
     setupEntryForm();
   }
@@ -1569,7 +1761,7 @@ function renderModal() {
               </div>
               <div class="form-row">
                 <div class="field"><label>Due date</label><input class="input" type="date" name="dueDate" value="${esc(data.dueDate)}" /></div>
-                <div class="field"><label>Due time (optional)</label><input class="input" type="time" name="dueTime" value="${esc(data.dueTime || '')}" id="task-time" /></div>
+                <div class="field"><label>Due time (optional)</label><input class="input" type="time" name="dueTime" value="${esc(data.dueTime || '')}" /></div>
               </div>
               <div class="form-row">
                 <div class="field">
@@ -1603,8 +1795,7 @@ function renderModal() {
             </form>
           </div>
         </div>
-      </div>
-    `;
+      </div>`;
     refreshIcons();
     setupTaskForm();
   }
@@ -1613,9 +1804,8 @@ function renderModal() {
 function setupEntryForm() {
   const form = document.getElementById('entry-form');
   if (!form) return;
-  // mood buttons
   form.querySelectorAll('.mood-opt').forEach(el => {
-    el.addEventListener('click', (e) => {
+    el.addEventListener('click', () => {
       const mood = el.dataset.mood;
       form.querySelector(`input[name="mood"][value="${mood}"]`).checked = true;
       form.querySelectorAll('.mood-opt').forEach(o => {
@@ -1683,29 +1873,6 @@ function setupTaskForm() {
 }
 
 // ============================================================
-// FALL-BACK TO LOCAL STORAGE (when Firebase is misconfigured)
-// ============================================================
-async function fallbackToLocal() {
-  storageMode = (typeof window !== 'undefined' && window.storage) ? 'artifact' : 'local';
-  state.bootError = null;
-  const stored = await storageLoad();
-  if (stored) {
-    state.data = { ...state.data, ...stored, settings: { ...DEFAULT_SETTINGS, ...(stored.settings || {}) } };
-  }
-  if (!state.data.seeded && state.data.entries.length === 0 && state.data.tasks.length === 0) {
-    const sample = buildSampleData();
-    state.data.entries = sample.entries;
-    state.data.tasks = sample.tasks;
-    state.data.seeded = true;
-    persist();
-  }
-  applyTheme();
-  state.loaded = true;
-  render();
-  toast('Running with local storage');
-}
-
-// ============================================================
 // GLOBAL EVENT DELEGATION
 // ============================================================
 document.addEventListener('click', (e) => {
@@ -1732,7 +1899,7 @@ document.addEventListener('click', (e) => {
     case 'set-theme':     updateSettings({ theme: target.dataset.theme }); break;
     case 'set-accent':    updateSettings({ accent: target.dataset.accent }); break;
     case 'request-notifications': requestNotifications(); break;
-    case 'cat-delete':    if (confirm('Remove this category? Existing items will keep showing it.')) updateCategories(state.data.categories.filter(c => c.id !== id)); break;
+    case 'cat-delete':    if (confirm('Remove this category?')) updateCategories(state.data.categories.filter(c => c.id !== id)); break;
     case 'cat-add': {
       const nameEl = document.getElementById('new-cat-name');
       const colorEl = document.getElementById('new-cat-color');
@@ -1746,7 +1913,7 @@ document.addEventListener('click', (e) => {
       const upcoming = state.data.tasks.filter(t => !t.completed);
       if (upcoming.length === 0) { toast('No tasks to export'); return; }
       downloadFile('daily-planner.ics', buildICS(upcoming), 'text/calendar');
-      toast('Calendar file downloaded — import into Google Calendar');
+      toast('Calendar file downloaded');
       break;
     }
     case 'export-json': {
@@ -1771,7 +1938,6 @@ document.addEventListener('click', (e) => {
             categories: data.categories || DEFAULT_CATEGORIES.slice(),
             entries: data.entries,
             tasks: data.tasks,
-            seeded: true,
           };
           applyTheme(); await persist(); render(); toast('Backup imported');
         } catch (err) { alert('Could not read that file.'); }
@@ -1779,15 +1945,14 @@ document.addEventListener('click', (e) => {
       input.click();
       break;
     }
-    case 'google-signin': signInWithGoogle(); break;
-    case 'signout':       signOutUser(); break;
-    case 'hide-banner':   updateSettings({ hideFirebaseBanner: true }); break;
-    case 'reload':        location.reload(); break;
-    case 'continue-offline': fallbackToLocal(); break;
+    case 'google-signin':       signInWithGoogle(); break;
+    case 'signout':             signOutUser(); break;
+    case 'trigger-install':     triggerInstall(); break;
+    case 'hide-install-banner': updateSettings({ hideInstallBanner: true }); break;
+    case 'reload':              location.reload(); break;
   }
 });
 
-// input events
 document.addEventListener('input', (e) => {
   const target = e.target.closest('[data-action]');
   if (!target) return;
@@ -1808,15 +1973,12 @@ document.addEventListener('input', (e) => {
 // ============================================================
 async function init() {
   applyTheme();
-
-  // Render an initial loading screen immediately, so the user never sees a blank page
   render();
 
-  // If the Firebase SDK itself failed to load, surface that and let the user fall back.
   if (USE_FIREBASE && !fb) {
     state.bootError = {
       title: 'Firebase SDK failed to load',
-      message: 'The browser couldn\'t fetch the Firebase modules from gstatic.com. Check your internet connection, or click "Continue with local storage" to use the app offline.',
+      message: 'Check your internet connection and reload.',
       code: (fbInitError && fbInitError.message) || '',
     };
     state.loaded = true;
@@ -1825,41 +1987,27 @@ async function init() {
   }
 
   if (storageMode === 'firebase') {
-    // Safety net: if Firebase hangs for >8s for any reason (anon auth disabled,
-    // page opened via file://, blocked domain, etc.), show the user an error
-    // screen instead of leaving them on "Loading…" forever.
     const timeoutId = setTimeout(() => {
       if (!state.loaded) {
-        console.warn('Firebase init timed out — likely a config issue.');
+        console.warn('Firebase init timed out');
         state.bootError = {
-          title: 'Firebase didn\'t respond in time',
-          message: 'This usually means Anonymous sign-in isn\'t enabled, this page is opened via file:// (it must be served over http), or your network is blocking Firebase. Open the browser console for the exact error.',
+          title: 'Firebase didn\'t respond',
+          message: 'Anonymous sign-in might not be enabled, or this page might be opened via file://. Check the console for the exact error.',
           code: 'timeout',
         };
         state.loaded = true;
         render();
       }
     }, 8000);
-
-    try {
-      await initFirebaseAuth();
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    try { await initFirebaseAuth(); }
+    finally { clearTimeout(timeoutId); }
     return;
   }
 
-  // Local / artifact mode
+  // Local-only mode (no Firebase) — load whatever is in localStorage
   const stored = await storageLoad();
   if (stored) {
     state.data = { ...state.data, ...stored, settings: { ...DEFAULT_SETTINGS, ...(stored.settings || {}) } };
-  }
-  if (!state.data.seeded && state.data.entries.length === 0 && state.data.tasks.length === 0) {
-    const sample = buildSampleData();
-    state.data.entries = sample.entries;
-    state.data.tasks = sample.tasks;
-    state.data.seeded = true;
-    persist();
   }
   applyTheme();
   state.loaded = true;
@@ -1881,7 +2029,6 @@ init();
     }
   }
 */
-
 </script>
 </body>
 </html>
