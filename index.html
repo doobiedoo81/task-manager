@@ -622,7 +622,12 @@ async function initFirebaseAuth() {
   return new Promise((resolve) => {
     let resolved = false;
     const done = () => { if (!resolved) { resolved = true; resolve(); } };
-
+// At the top of initFirebaseAuth, before the onAuthStateChanged call:
+try {
+  await fb.authMod.getRedirectResult(fb.auth);
+} catch (e) {
+  console.error('Redirect result error:', e);
+}
     fb.authMod.onAuthStateChanged(fb.auth, async (user) => {
       if (!user) {
         try {
@@ -721,16 +726,52 @@ function friendlyFirestoreError(e) {
 
 async function signInWithGoogle() {
   if (!fb) return;
+  const provider = new fb.authMod.GoogleAuthProvider();
+
   try {
-    const provider = new fb.authMod.GoogleAuthProvider();
+    // If currently anonymous, upgrade (link) so existing data carries over.
+    if (fb.auth.currentUser && fb.auth.currentUser.isAnonymous) {
+      try {
+        await fb.authMod.linkWithPopup(fb.auth.currentUser, provider);
+        toast('Signed in with Google — your data carried over');
+        return;
+      } catch (linkErr) {
+        // If that Google account already exists in this project, fall through
+        // to regular sign-in so the user can still get into their account.
+        if (linkErr.code !== 'auth/credential-already-in-use'
+         && linkErr.code !== 'auth/email-already-in-use') {
+          throw linkErr;
+        }
+        console.warn('Google account already exists — signing into it instead. Anonymous data will not carry over.');
+        toast('That Google account already exists — signing in to it');
+      }
+    }
+
     await fb.authMod.signInWithPopup(fb.auth, provider);
     toast('Signed in with Google');
-  } catch (e) { console.error(e); toast('Sign-in cancelled'); }
-}
-async function signOutUser() {
-  if (!fb) return;
-  await fb.authMod.signOut(fb.auth);
-  toast('Signed out');
+
+  } catch (e) {
+    console.error('Google sign-in failed:', e.code, e.message, e);
+
+    // If the popup itself is the problem, try the redirect flow as a fallback.
+    if (e.code === 'auth/popup-blocked'
+     || e.code === 'auth/popup-closed-by-user'
+     || e.code === 'auth/cancelled-popup-request') {
+      try {
+        toast('Popup blocked — redirecting…');
+        await fb.authMod.signInWithRedirect(fb.auth, provider);
+        return;
+      } catch (redirErr) {
+        console.error('Redirect sign-in also failed:', redirErr);
+      }
+    }
+
+    if (e.code === 'auth/unauthorized-domain') {
+      toast('Add this domain to Firebase → Auth → Authorized domains', 'error');
+    } else {
+      toast('Sign-in failed: ' + (e.code || 'unknown — see console'), 'error');
+    }
+  }
 }
 
 // ============================================================
