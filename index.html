@@ -619,15 +619,17 @@ function updateCategories(cats) {
 // ============================================================
 async function initFirebaseAuth() {
   if (!fb) return;
+  
+  // Handle redirect results before setting up listener
+  try {
+    await fb.authMod.getRedirectResult(fb.auth);
+  } catch (e) {
+    console.error('Redirect result error:', e);
+  }
+  
   return new Promise((resolve) => {
     let resolved = false;
     const done = () => { if (!resolved) { resolved = true; resolve(); } };
-// At the top of initFirebaseAuth, before the onAuthStateChanged call:
-try {
-  await fb.authMod.getRedirectResult(fb.auth);
-} catch (e) {
-  console.error('Redirect result error:', e);
-}
     fb.authMod.onAuthStateChanged(fb.auth, async (user) => {
       if (!user) {
         try {
