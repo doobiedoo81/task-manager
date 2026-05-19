@@ -4,374 +4,212 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Daily Planner</title>
-
-<!-- ============= PWA / Add-to-Home-Screen support ============= -->
 <meta name="theme-color" content="#D2542F" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Daily" />
-<meta name="application-name" content="Daily Planner" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23D2542F'/%3E%3Ctext x='90' y='118' font-family='Georgia,serif' font-size='100' font-style='italic' font-weight='600' fill='white' text-anchor='middle'%3ED.%3C/text%3E%3C/svg%3E" />
 <link rel="icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23D2542F'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='58' font-style='italic' font-weight='600' fill='white' text-anchor='middle'%3ED.%3C/text%3E%3C/svg%3E" />
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
- 
-  :root {
-    --bg:        #F8F5EE;
-    --surface:   #FFFFFF;
-    --surface-2: #FDFBF4;
-    --border:    #E8E2D4;
-    --text:      #1A1814;
-    --text-dim:  #6B6258;
-    --text-faint:#A89F90;
-    --accent:    #D2542F;
-    --accent-soft: #F4D9CE;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-  }
-  [data-theme="dark"] {
-    --bg:        #16140F;
-    --surface:   #211E18;
-    --surface-2: #2B2720;
-    --border:    #3A352C;
-    --text:      #F0E9DC;
-    --text-dim:  #A89F90;
-    --text-faint:#6B6258;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-    --shadow-md: 0 8px 24px rgba(0,0,0,0.35);
-  }
-  [data-accent="coral"]  { --accent:#D2542F; --accent-soft:#F4D9CE; }
-  [data-accent="sage"]   { --accent:#6B8E5A; --accent-soft:#DCE5D4; }
-  [data-accent="navy"]   { --accent:#1E3A5F; --accent-soft:#C8D2DD; }
-  [data-accent="plum"]   { --accent:#7B3F5C; --accent-soft:#E0CFD5; }
-  [data-accent="amber"]  { --accent:#C8861D; --accent-soft:#F0DDB8; }
+:root { --bg:#F8F5EE; --surface:#FFFFFF; --surface-2:#FDFBF4; --border:#E8E2D4; --text:#1A1814; --text-dim:#6B6258; --text-faint:#A89F90; --accent:#D2542F; --accent-soft:#F4D9CE; --danger:#D2542F; }
+[data-theme="dark"] { --bg:#16140F; --surface:#211E18; --surface-2:#2B2720; --border:#3A352C; --text:#F0E9DC; --text-dim:#A89F90; --text-faint:#6B6258; }
+[data-accent="coral"]{--accent:#D2542F;--accent-soft:#F4D9CE;}
+[data-accent="sage"]{--accent:#6B8E5A;--accent-soft:#DCE5D4;}
+[data-accent="navy"]{--accent:#1E3A5F;--accent-soft:#C8D2DD;}
+[data-accent="plum"]{--accent:#7B3F5C;--accent-soft:#E0CFD5;}
+[data-accent="amber"]{--accent:#C8861D;--accent-soft:#F0DDB8;}
 
-  *, *::before, *::after { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-    transition: background 0.3s, color 0.3s;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  button, input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
-  button { cursor: pointer; background: transparent; border: none; padding: 0; }
-  a { color: var(--accent); }
-  ::placeholder { color: var(--text-faint); }
-  .display { font-family: 'Fraunces', Georgia, serif; font-optical-sizing: auto; letter-spacing: -0.015em; }
-  .mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-  i[data-lucide] { display: inline-flex; vertical-align: middle; width: 1em; height: 1em; }
-  #app { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
-  #app.full { display: block; grid-template-columns: none; }
-  .sidebar {
-    border-right: 1px solid var(--border);
-    background: var(--surface-2);
-    padding: 28px 18px 18px;
-    position: sticky; top: 0; height: 100vh;
-    display: flex; flex-direction: column; gap: 4px;
-  }
-  .sidebar .brand { padding: 0 8px 24px; }
-  .sidebar .brand h1 { font-size: 28px; font-weight: 600; margin: 0; font-style: italic; line-height: 1; }
-  .sidebar .brand h1 span { color: var(--accent); }
-  .sidebar .brand small { display: block; margin-top: 6px; font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em; }
-  .nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px; border-radius: 8px;
-    color: var(--text); font-size: 14px; font-weight: 500;
-    text-align: left; width: 100%; transition: background 0.15s, color 0.15s;
-  }
-  .nav-item:hover { background: var(--surface); }
-  .nav-item.active { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); font-weight: 600; }
-  .sidebar .credit { margin-top: auto; padding: 12px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-faint); line-height: 1.5; }
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .3s,color .3s;padding-bottom:env(safe-area-inset-bottom,0px);}
+button,input,textarea,select{font-family:inherit;font-size:inherit;color:inherit;}
+button{cursor:pointer;background:transparent;border:none;padding:0;}
+a{color:var(--accent);}
+::placeholder{color:var(--text-faint);}
+.display{font-family:'Fraunces',Georgia,serif;font-optical-sizing:auto;letter-spacing:-0.015em;}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+i[data-lucide]{display:inline-flex;vertical-align:middle;width:1em;height:1em;}
 
-  main { min-width: 0; }
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px clamp(16px, 3vw, 32px);
-    border-bottom: 1px solid var(--border);
-    background: var(--bg);
-    position: sticky; top: 0; z-index: 10;
-    backdrop-filter: blur(8px);
-  }
-  .topbar .date { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.15em; }
-  .topbar h2 { margin: 2px 0 0; font-size: clamp(22px, 4vw, 32px); font-weight: 600; }
-  .icon-btn {
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text); width: 40px; height: 40px; border-radius: 999px;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .icon-btn:hover { background: var(--surface-2); }
+#app{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+#app.full{display:block;grid-template-columns:none;}
+.sidebar{border-right:1px solid var(--border);background:var(--surface-2);padding:28px 18px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px;}
+.sidebar .brand{padding:0 8px 24px;}
+.sidebar .brand h1{font-size:28px;font-weight:600;margin:0;font-style:italic;line-height:1;}
+.sidebar .brand h1 span{color:var(--accent);}
+.sidebar .brand small{display:block;margin-top:6px;font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.15em;}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;color:var(--text);font-size:14px;font-weight:500;text-align:left;width:100%;transition:background .15s;}
+.nav-item:hover{background:var(--surface);}
+.nav-item.active{background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);font-weight:600;}
+.sidebar .credit{margin-top:auto;padding:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text-faint);line-height:1.5;}
 
-  .view { padding: clamp(16px, 3vw, 32px); padding-bottom: 120px; }
+main{min-width:0;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px clamp(16px,3vw,32px);border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);}
+.topbar .date{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.15em;}
+.topbar h2{margin:2px 0 0;font-size:clamp(22px,4vw,32px);font-weight:600;}
+.icon-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);width:40px;height:40px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;}
+.icon-btn:hover{background:var(--surface-2);}
+.view{padding:clamp(16px,3vw,32px);padding-bottom:120px;}
 
-  .mobile-nav {
-    display: none;
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface); border-top: 1px solid var(--border);
-    padding: 8px 4px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-    justify-content: space-around; z-index: 50;
-  }
-  .mobile-nav button {
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    color: var(--text-dim); padding: 6px 8px; font-size: 10px; font-weight: 500; flex: 1;
-  }
-  .mobile-nav button.active { color: var(--accent); }
-  .mobile-nav button i { font-size: 20px; }
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:8px 4px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));justify-content:space-around;z-index:50;overflow-x:auto;}
+.mobile-nav button{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text-dim);padding:6px 6px;font-size:10px;font-weight:500;flex:1;min-width:54px;}
+.mobile-nav button.active{color:var(--accent);}
+.mobile-nav button i{font-size:20px;}
+@media (max-width:760px){#app{grid-template-columns:1fr;}.sidebar{display:none;}.mobile-nav{display:flex;}.fab{bottom:88px !important;}}
 
-  @media (max-width: 760px) {
-    #app { grid-template-columns: 1fr; }
-    .sidebar { display: none; }
-    .mobile-nav { display: flex; }
-    .fab { bottom: 88px !important; }
-  }
+.fab{position:fixed;bottom:28px;right:28px;z-index:40;background:var(--accent);color:white;border-radius:999px;padding:14px 22px;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 40%,transparent),0 2px 4px rgba(0,0,0,0.1);transition:transform .15s;}
+.fab:hover{transform:translateY(-2px);}
 
-  .fab {
-    position: fixed; bottom: 28px; right: 28px; z-index: 40;
-    background: var(--accent); color: white;
-    border-radius: 999px; padding: 14px 22px;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 14px; font-weight: 600;
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 40%, transparent), 0 2px 4px rgba(0,0,0,0.1);
-    transition: transform 0.15s;
-  }
-  .fab:hover { transform: translateY(-2px); }
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px;
-  }
-  .card header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; gap: 12px; }
-  .card header h3 { margin: 0; font-size: 18px; font-weight: 600; font-family: 'Fraunces', Georgia, serif; letter-spacing: -0.01em; }
-  .card header .sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-  .card-link { background: transparent; color: var(--accent); font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;}
+.card header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:12px;}
+.card header h3{margin:0;font-size:18px;font-weight:600;font-family:'Fraunces',serif;letter-spacing:-0.01em;}
+.card header .sub{font-size:12px;color:var(--text-dim);margin-top:2px;}
+.card-link{background:transparent;color:var(--accent);font-size:13px;font-weight:600;flex-shrink:0;}
 
-  .stat-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 18px;
-  }
-  .stat-card .label { display: flex; align-items: center; gap: 8px; color: var(--text-dim); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.1em; }
-  .stat-card .value { font-family: 'Fraunces', serif; font-size: 32px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
-  .stat-card .sub { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.stat-card .label{display:flex;align-items:center;gap:8px;color:var(--text-dim);font-size:11px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;}
+.stat-card .value{font-family:'Fraunces',serif;font-size:32px;font-weight:600;line-height:1;letter-spacing:-0.02em;}
+.stat-card .sub{font-size:12px;color:var(--text-faint);margin-top:4px;}
 
-  .hero {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 28px 32px;
-    position: relative; overflow: hidden;
-    background-image: radial-gradient(color-mix(in srgb, var(--accent) 10%, transparent) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
-  .hero .greeting { font-size: 13px; color: var(--text-dim); margin-bottom: 8px; }
-  .hero h2 { margin: 0; font-family: 'Fraunces', serif; font-size: clamp(24px, 5vw, 44px); font-weight: 500; line-height: 1.1; letter-spacing: -0.025em; max-width: 24ch; }
-  .hero h2 em { color: var(--accent); font-style: italic; font-weight: 600; }
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;position:relative;overflow:hidden;background-image:radial-gradient(color-mix(in srgb,var(--accent) 10%,transparent) 1px,transparent 1px);background-size:24px 24px;}
+.hero .greeting{font-size:13px;color:var(--text-dim);margin-bottom:8px;}
+.hero h2{margin:0;font-family:'Fraunces',serif;font-size:clamp(24px,5vw,44px);font-weight:500;line-height:1.1;letter-spacing:-0.025em;max-width:24ch;}
+.hero h2 em{color:var(--accent);font-style:italic;font-weight:600;}
 
-  .empty {
-    padding: 40px; text-align: center;
-    background: var(--surface); border: 1px dashed var(--border);
-    border-radius: 16px; color: var(--text-faint);
-  }
-  .empty i { font-size: 32px !important; margin-bottom: 12px; color: var(--text-faint); }
-  .empty .title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-  .empty .desc { color: var(--text-dim); font-size: 13px; }
+.empty{padding:40px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:16px;color:var(--text-faint);}
+.empty i{font-size:32px !important;margin-bottom:12px;color:var(--text-faint);}
+.empty .title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.empty .desc{color:var(--text-dim);font-size:13px;}
 
-  .chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11px; font-weight: 600;
-    padding: 3px 8px; border-radius: 999px;
-    text-transform: uppercase; letter-spacing: 0.05em;
-  }
-  .chip .dot { width: 6px; height: 6px; border-radius: 999px; }
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:0.05em;}
+.chip .dot{width:6px;height:6px;border-radius:999px;}
 
-  .task-row {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 12px 14px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-left-width: 3px; border-radius: 10px;
-    transition: opacity 0.2s, background 0.2s;
-  }
-  .task-row.completed { opacity: 0.55; }
-  .task-row.overdue { border-color: color-mix(in srgb, #D2542F 50%, var(--border)); }
-  .task-row .check { padding: 0; margin-top: 1px; color: var(--text-dim); display: flex; }
-  .task-row.completed .check { color: var(--accent); }
-  .task-row .body { flex: 1; min-width: 0; }
-  .task-row .title-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .task-row .title { font-size: 15px; font-weight: 500; }
-  .task-row.completed .title { text-decoration: line-through; }
-  .task-row .meta { font-size: 12px; color: var(--text-dim); display: inline-flex; align-items: center; gap: 3px; }
-  .task-row .desc { font-size: 13px; color: var(--text-dim); margin-top: 4px; line-height: 1.5; }
-  .task-row .actions { display: flex; gap: 2px; }
-  .task-row .actions button { color: var(--text-dim); padding: 6px; border-radius: 6px; display: flex; }
-  .task-row .actions button:hover { background: var(--surface-2); color: var(--text); }
+.task-row{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-left-width:3px;border-radius:10px;}
+.task-row.completed{opacity:0.55;}
+.task-row.overdue{border-color:color-mix(in srgb,#D2542F 50%,var(--border));}
+.task-row .check{padding:0;margin-top:1px;color:var(--text-dim);display:flex;}
+.task-row.completed .check{color:var(--accent);}
+.task-row .body{flex:1;min-width:0;}
+.task-row .title-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.task-row .title{font-size:15px;font-weight:500;}
+.task-row.completed .title{text-decoration:line-through;}
+.task-row .meta{font-size:12px;color:var(--text-dim);display:inline-flex;align-items:center;gap:3px;}
+.task-row .desc{font-size:13px;color:var(--text-dim);margin-top:4px;line-height:1.5;}
+.task-row .actions{display:flex;gap:2px;}
+.task-row .actions button{color:var(--text-dim);padding:6px;border-radius:6px;display:flex;}
+.task-row .actions button:hover{background:var(--surface-2);color:var(--text);}
 
-  .entry-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px; position: relative;
-  }
-  .timeline { position: relative; padding-left: 32px; }
-  .timeline::before { content: ''; position: absolute; left: 14px; top: 12px; bottom: 12px; width: 1px; background: var(--border); }
-  .timeline .entry-card::before { content: ''; position: absolute; left: -25px; top: 22px; width: 12px; height: 12px; border-radius: 999px; background: var(--accent); border: 2px solid var(--bg); }
-  .entry-card .meta-line { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
-  .entry-card .title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
-  .entry-card .desc { font-size: 14px; color: var(--text-dim); line-height: 1.55; white-space: pre-wrap; margin-top: 6px; }
+.entry-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;}
+.timeline{position:relative;padding-left:32px;}
+.timeline::before{content:'';position:absolute;left:14px;top:12px;bottom:12px;width:1px;background:var(--border);}
+.timeline .entry-card::before{content:'';position:absolute;left:-25px;top:22px;width:12px;height:12px;border-radius:999px;background:var(--accent);border:2px solid var(--bg);}
+.entry-card .meta-line{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+.entry-card .title{font-family:'Fraunces',serif;font-size:17px;font-weight:600;letter-spacing:-0.01em;}
+.entry-card .desc{font-size:14px;color:var(--text-dim);line-height:1.55;white-space:pre-wrap;margin-top:6px;}
 
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .field .hint { font-size: 12px; color: var(--text-faint); margin-top: 6px; }
-  .input, .textarea, select.input {
-    width: 100%; background: var(--surface-2); border: 1px solid var(--border);
-    color: var(--text); padding: 10px 12px; border-radius: 8px; outline: none;
-    transition: border-color 0.15s;
-  }
-  .input:focus, .textarea:focus, select.input:focus { border-color: var(--accent); }
-  .textarea { resize: vertical; min-height: 80px; font-family: inherit; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+.coll-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;}
+.coll-card .info{flex:1;min-width:0;}
+.coll-card .name{font-family:'Fraunces',serif;font-size:16px;font-weight:600;margin-bottom:2px;}
+.coll-card .meta{font-size:12px;color:var(--text-dim);}
+.coll-card .price{font-family:'Fraunces',serif;font-size:18px;font-weight:600;color:var(--accent);white-space:nowrap;}
+.coll-card .actions{display:flex;gap:2px;}
+.coll-card .actions button{color:var(--text-dim);padding:6px;border-radius:6px;display:flex;}
 
-  .day-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-  .day-pill {
-    width: 38px; height: 38px; border-radius: 999px;
-    background: var(--surface-2); border: 1px solid var(--border);
-    color: var(--text-dim); font-size: 13px; font-weight: 600;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .day-pill.active {
-    background: var(--accent); color: white; border-color: var(--accent);
-  }
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--text-dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.field .hint{font-size:12px;color:var(--text-faint);margin-top:6px;}
+.input,.textarea,select.input{width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;outline:none;transition:border-color .15s;}
+.input:focus,.textarea:focus,select.input:focus{border-color:var(--accent);}
+.textarea{resize:vertical;min-height:80px;font-family:inherit;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:480px){.form-row{grid-template-columns:1fr;}}
 
-  .btn { padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: opacity 0.15s, transform 0.05s; justify-content: center; }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { opacity: 0.92; }
-  .btn-primary:disabled { opacity: 0.5; cursor: default; }
-  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--surface-2); }
+.day-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.day-pill{width:38px;height:38px;border-radius:999px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-dim);font-size:13px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;}
+.day-pill.active{background:var(--accent);color:white;border-color:var(--accent);}
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 100; animation: fadeIn 0.2s; }
-  .modal { background: var(--surface); border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow: auto; border: 1px solid var(--border); animation: slideUp 0.25s; }
-  .modal header { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--surface); z-index: 1; }
-  .modal header h2 { margin: 0; font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; }
-  .modal .body { padding: 22px; }
-  .modal .footer-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+.btn{padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:opacity .15s,transform .05s;justify-content:center;}
+.btn:active{transform:scale(0.98);}
+.btn-primary{background:var(--accent);color:white;}
+.btn-primary:hover{opacity:0.92;}
+.btn-primary:disabled{opacity:0.5;cursor:default;}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-danger{background:var(--danger);color:white;}
+.btn-danger:hover{opacity:0.92;}
 
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-  .cal-grid .day-label { font-size: 11px; color: var(--text-dim); text-align: center; font-weight: 600; letter-spacing: 0.05em; padding: 4px 0; }
-  .cal-cell {
-    aspect-ratio: 1; min-height: 48px;
-    background: var(--surface-2); border: 1px solid transparent;
-    border-radius: 8px; padding: 6px;
-    display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-    font-weight: 500; font-size: 13px;
-    text-align: left;
-  }
-  .cal-cell.today { background: color-mix(in srgb, var(--accent) 10%, transparent); font-weight: 700; }
-  .cal-cell.selected { background: var(--accent); color: white; border-color: var(--accent); }
-  .cal-cell .dots { display: flex; gap: 2px; }
-  .cal-cell .dots span { width: 5px; height: 5px; border-radius: 999px; }
-  .cal-cell.selected .dots span { background: white !important; }
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:100;animation:fadeIn .2s;}
+.modal{background:var(--surface);border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow:auto;border:1px solid var(--border);animation:slideUp .25s;}
+.modal header{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;}
+.modal header h2{margin:0;font-family:'Fraunces',serif;font-size:20px;font-weight:600;}
+.modal .body{padding:22px;}
+.modal .footer-row{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;flex-wrap:wrap;}
 
-  @media (max-width: 760px) {
-    .cal-cell {
-      aspect-ratio: auto;
-      min-height: 42px;
-      padding: 4px;
-      font-size: 12px;
-      border-radius: 6px;
-    }
-    .cal-cell .dots span { width: 4px; height: 4px; }
-    .cal-grid { gap: 3px; }
-  }
-  .pill {
-    padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500;
-    background: var(--surface); color: var(--text); border: 1px solid var(--border);
-  }
-  .pill.active { background: var(--accent); color: white; border-color: var(--accent); }
-  .install-banner {
-    background: var(--accent);
-    color: white;
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex; align-items: center; gap: 12px;
-    font-size: 13px;
-    margin-bottom: 16px;
-  }
-  .install-banner .btn-light {
-    background: white; color: var(--accent);
-    padding: 6px 12px; border-radius: 6px;
-    font-weight: 600; font-size: 12px;
-  }
-  .install-banner .x { color: white; padding: 4px; margin-left: 4px; opacity: 0.8; }
-  .boot-screen {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-    background: var(--bg);
-    z-index: 1000;
-  }
-  .boot-card {
-    max-width: 440px; width: 100%;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 20px; padding: 36px 32px;
-    text-align: center;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.06);
-  }
-  .boot-card .spinner {
-    width: 32px; height: 32px; border-radius: 999px;
-    border: 3px solid var(--border); border-top-color: var(--accent);
-    animation: spin 0.8s linear infinite;
-    margin: 0 auto 16px;
-  }
-  .boot-logo {
-    font-family: 'Fraunces', Georgia, serif;
-    font-size: 56px; font-weight: 600; font-style: italic;
-    line-height: 1; letter-spacing: -0.02em;
-    margin-bottom: 8px;
-  }
-  .boot-logo span { color: var(--accent); }
-  .boot-tagline { font-size: 14px; color: var(--text-dim); margin-bottom: 32px; }
-  .google-btn {
-    width: 100%;
-    background: white; color: #1f1f1f;
-    border: 1px solid #dadce0;
-    padding: 12px 16px; border-radius: 10px;
-    font-size: 15px; font-weight: 500;
-    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-    transition: background 0.15s, box-shadow 0.15s;
-  }
-  .google-btn:hover { background: #f8f9fa; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-  [data-theme="dark"] .google-btn { background: #fff; color: #1f1f1f; }
-  .google-g { width: 18px; height: 18px; flex-shrink: 0; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-  @keyframes slideUp { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-  .anim-slide { animation: slideUp 0.35s ease-out backwards; }
-  .anim-fade { animation: fadeIn 0.25s ease-out; }
-  #toast-root { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
-  .toast { background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md); animation: slideUp 0.25s; max-width: 90vw; }
-  .toast.toast-error { background: #D2542F; color: white; }
-  .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-  .grid-twocol { display: grid; grid-template-columns: 1fr; gap: 16px; }
-  @media (min-width: 900px) { .grid-twocol { grid-template-columns: 1.5fr 1fr; } }
-  .col-stack { display: flex; flex-direction: column; gap: 16px; }
-  .stack-sm { display: flex; flex-direction: column; gap: 8px; }
-  .row-wrap { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .spacer { flex: 1; }
-  .swatch { width: 36px; height: 36px; border-radius: 999px; border: 3px solid transparent; }
-  .swatch.active { border-color: var(--text); box-shadow: 0 0 0 2px currentColor; }
+.confirm-icon{width:48px;height:48px;border-radius:999px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;}
+.confirm-icon.danger{background:color-mix(in srgb,var(--danger) 15%,transparent);color:var(--danger);}
+.confirm-icon.warn{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);}
+.confirm-icon.info{background:var(--surface-2);color:var(--text-dim);}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-grid .day-label{font-size:11px;color:var(--text-dim);text-align:center;font-weight:600;letter-spacing:0.05em;padding:4px 0;}
+.cal-cell{aspect-ratio:1;min-height:48px;background:var(--surface-2);border:1px solid transparent;border-radius:8px;padding:6px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;font-weight:500;font-size:13px;text-align:left;}
+.cal-cell.today{background:color-mix(in srgb,var(--accent) 10%,transparent);font-weight:700;}
+.cal-cell.selected{background:var(--accent);color:white;border-color:var(--accent);}
+.cal-cell .dots{display:flex;gap:2px;}
+.cal-cell .dots span{width:5px;height:5px;border-radius:999px;}
+.cal-cell.selected .dots span{background:white !important;}
+@media (max-width:760px){.cal-cell{aspect-ratio:auto;min-height:42px;padding:4px;font-size:12px;border-radius:6px;}.cal-cell .dots span{width:4px;height:4px;}.cal-grid{gap:3px;}}
+
+.pill{padding:7px 14px;border-radius:999px;font-size:13px;font-weight:500;background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.pill.active{background:var(--accent);color:white;border-color:var(--accent);}
+
+.install-banner{background:var(--accent);color:white;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;font-size:13px;margin-bottom:16px;}
+.install-banner .btn-light{background:white;color:var(--accent);padding:6px 12px;border-radius:6px;font-weight:600;font-size:12px;}
+.install-banner .x{color:white;padding:4px;margin-left:4px;opacity:0.8;}
+
+.boot-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg);z-index:1000;}
+.boot-card{max-width:440px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 32px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,0.06);}
+.boot-card .spinner{width:32px;height:32px;border-radius:999px;border:3px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite;margin:0 auto 16px;}
+.boot-logo{font-family:'Fraunces',serif;font-size:56px;font-weight:600;font-style:italic;line-height:1;letter-spacing:-0.02em;margin-bottom:8px;}
+.boot-logo span{color:var(--accent);}
+.boot-tagline{font-size:14px;color:var(--text-dim);margin-bottom:32px;}
+.google-btn{width:100%;background:white;color:#1f1f1f;border:1px solid #dadce0;padding:12px 16px;border-radius:10px;font-size:15px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:12px;}
+.google-btn:hover{background:#f8f9fa;box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+[data-theme="dark"] .google-btn{background:#fff;color:#1f1f1f;}
+.google-g{width:18px;height:18px;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.anim-slide{animation:slideUp .35s ease-out backwards;}
+.anim-fade{animation:fadeIn .25s ease-out;}
+
+#toast-root{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:13px;font-weight:500;box-shadow:var(--shadow-md);animation:slideUp .25s;max-width:90vw;}
+.toast.toast-error{background:var(--danger);color:white;}
+
+.grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+.grid-twocol{display:grid;grid-template-columns:1fr;gap:16px;}
+@media (min-width:900px){.grid-twocol{grid-template-columns:1.5fr 1fr;}}
+.col-stack{display:flex;flex-direction:column;gap:16px;}
+.stack-sm{display:flex;flex-direction:column;gap:8px;}
+.row-wrap{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.spacer{flex:1;}
+.swatch{width:36px;height:36px;border-radius:999px;border:3px solid transparent;}
+.swatch.active{border-color:var(--text);box-shadow:0 0 0 2px currentColor;}
+.date-header{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.date-header span:nth-child(2){flex:1;height:1px;background:var(--border);}
 </style>
 </head>
 <body data-theme="light" data-accent="coral">
-  <div id="app"></div>
-  <div id="modal-root"></div>
-  <div id="toast-root"></div>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
 
 <script type="module">
-
 const firebaseConfig = {
   apiKey: "AIzaSyCN9IqNF0-ec7Th1nlJZog3RjUTCjNYN6I",
   authDomain: "task-manager-39f2b.firebaseapp.com",
@@ -386,20 +224,19 @@ const USE_FIREBASE = !firebaseConfig.apiKey.includes('YOUR_');
 let fb = null, fbInitError = null;
 if (USE_FIREBASE) {
   try {
-    const appMod  = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const appMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
     const authMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
-    const fsMod   = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const fsMod = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     const app = appMod.initializeApp(firebaseConfig);
     fb = { app, auth: authMod.getAuth(app), db: fsMod.getFirestore(app), authMod, fsMod };
   } catch (e) { console.error('Firebase init failed:', e); fbInitError = e; }
 }
 
-(function setupPWAManifest() {
+(() => {
   const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="115" fill="#D2542F"/><text x="256" y="345" font-family="Georgia,serif" font-size="280" font-style="italic" font-weight="600" fill="white" text-anchor="middle">D.</text></svg>`;
   const iconUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(iconSvg);
   const manifest = {
     name: 'Daily Planner', short_name: 'Daily',
-    description: 'A personal journal & task planner',
     start_url: location.pathname + location.search,
     scope: location.pathname.replace(/[^/]+$/, ''),
     display: 'standalone', orientation: 'portrait',
@@ -411,12 +248,13 @@ if (USE_FIREBASE) {
   link.rel = 'manifest'; link.href = url;
   document.head.appendChild(link);
 })();
+
 const ACCENT_COLORS = {
-  coral:  { name: 'Coral',  hex: '#D2542F' },
-  sage:   { name: 'Sage',   hex: '#6B8E5A' },
-  navy:   { name: 'Navy',   hex: '#1E3A5F' },
-  plum:   { name: 'Plum',   hex: '#7B3F5C' },
-  amber:  { name: 'Amber',  hex: '#C8861D' },
+  coral: { name: 'Coral', hex: '#D2542F' },
+  sage:  { name: 'Sage',  hex: '#6B8E5A' },
+  navy:  { name: 'Navy',  hex: '#1E3A5F' },
+  plum:  { name: 'Plum',  hex: '#7B3F5C' },
+  amber: { name: 'Amber', hex: '#C8861D' },
 };
 const PRIORITIES = {
   low:    { label: 'Low',    color: '#6B8E5A' },
@@ -435,30 +273,41 @@ const DEFAULT_CATEGORIES = [
   { id: 'health',   name: 'Health',   color: '#6B8E5A' },
   { id: 'learn',    name: 'Learning', color: '#C8861D' },
   { id: 'errands',  name: 'Errands',  color: '#D2542F' },
+  { id: 'flight',   name: 'Flight',   color: '#1E3A5F' },
 ];
 const DEFAULT_SETTINGS = {
   theme: 'light', accent: 'coral',
   notificationsEnabled: false,
   displayName: '',
   hideInstallBanner: false,
+  audioAlarm: true,
 };
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DAY_NAMES_SHORT = ['S','M','T','W','T','F','S'];
 
-// Reminder offsets in minutes before due time
-const REMINDER_OFFSETS_MIN = [60, 30, 10, 0];
+const REMINDER_PROFILES = {
+  default: [60, 30, 10, 0],
+  flight:  [180, 60, 0],
+};
+const offsetsFor = task => REMINDER_PROFILES[task.category === 'flight' ? 'flight' : 'default'];
+
+const CURRENCIES = ['RM','USD','MYR','SGD','JPY','EUR','GBP','HKD','CNY','THB','AUD'];
+const PURCHASE_KEYWORDS = /\b(preorder(?:ed)?|pre-?order(?:ed)?|buy|bought|order(?:ed)?|got|picked\s*up|purchased?|received|grabbed|copped)\b/gi;
+const PRICE_REGEX = /(?:(RM|USD|MYR|SGD|JPY|EUR|GBP|HKD|CNY|THB|AUD)\s?(\d{1,7}(?:[.,]\d{1,2})?)|(?<!\w)\$\s?(\d{1,7}(?:[.,]\d{1,2})?))/i;
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Today',    icon: 'layout-dashboard' },
-  { id: 'journal',   label: 'Journal',  icon: 'book-open' },
-  { id: 'tasks',     label: 'Tasks',    icon: 'list-todo' },
-  { id: 'calendar',  label: 'Calendar', icon: 'calendar' },
-  { id: 'history',   label: 'History',  icon: 'history' },
-  { id: 'settings',  label: 'Settings', icon: 'settings' },
+  { id: 'dashboard',  label: 'Today',      icon: 'layout-dashboard' },
+  { id: 'journal',    label: 'Journal',    icon: 'book-open' },
+  { id: 'tasks',      label: 'Tasks',      icon: 'list-todo' },
+  { id: 'collection', label: 'Collection', icon: 'package' },
+  { id: 'calendar',   label: 'Calendar',   icon: 'calendar' },
+  { id: 'history',    label: 'History',    icon: 'history' },
+  { id: 'settings',   label: 'Settings',   icon: 'settings' },
 ];
+
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-const ymd = (d) => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const ymd = d => { const x = new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; };
 const todayYMD = () => ymd(new Date());
 const tomorrowYMD = () => { const t = new Date(); t.setDate(t.getDate()+1); return ymd(t); };
 const fmtDate = (d, style='medium') => {
@@ -467,147 +316,144 @@ const fmtDate = (d, style='medium') => {
   if (style === 'long')  return x.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   return x.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 };
-const fmtTime = (t) => { if (!t) return ''; const [h, m] = t.split(':'); const d = new Date(); d.setHours(+h, +m); return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); };
+const fmtTime = t => { if (!t) return ''; const [h,m] = t.split(':'); const d = new Date(); d.setHours(+h, +m); return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); };
+const fmtMoney = (amt, ccy) => `${ccy} ${Number(amt).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 const greeting = () => { const h = new Date().getHours(); if (h<5) return 'Working late'; if (h<12) return 'Good morning'; if (h<17) return 'Good afternoon'; if (h<21) return 'Good evening'; return 'Good night'; };
-
-const isStandaloneInstalled = () =>
-  window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const isStandaloneInstalled = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 const isIOS = () => /iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.MSStream;
 const isAndroid = () => /Android/i.test(navigator.userAgent);
 
-// ----- Recurrence helpers -----
-function daysInMonth(d) {
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-}
-function describeRecurrence(task) {
-  if (!task.recurrence || task.recurrence === 'none') return '';
-  if (task.recurrence === 'daily') return 'Daily';
-  if (task.recurrence === 'weekly') {
-    const days = task.recurrenceDays || [];
-    if (days.length === 0) return 'Weekly';
+function daysInMonth(d) { return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); }
+
+function describeRecurrence(t) {
+  if (!t.recurrence || t.recurrence === 'none') return '';
+  if (t.recurrence === 'daily') return 'Daily';
+  if (t.recurrence === 'weekly') {
+    const days = t.recurrenceDays || [];
+    if (!days.length) return 'Weekly';
     if (days.length === 7) return 'Every day';
     if (days.length === 5 && [1,2,3,4,5].every(d => days.includes(d))) return 'Weekdays';
     if (days.length === 2 && days.includes(0) && days.includes(6)) return 'Weekends';
-    return 'Weekly · ' + days.sort().map(d => DAY_NAMES[d]).join(', ');
+    return 'Weekly · ' + [...days].sort().map(d => DAY_NAMES[d]).join(', ');
   }
-  if (task.recurrence === 'monthly') return `Monthly · day ${task.recurrenceDay || 1}`;
+  if (t.recurrence === 'monthly') return `Monthly · day ${t.recurrenceDay || 1}`;
   return '';
 }
-function nextDueDate(task) {
-  // Returns the next YMD date after task.dueDate based on recurrence rule.
-  // Always returns a date strictly AFTER the current dueDate.
-  const cur = new Date(task.dueDate + 'T00:00:00');
 
-  if (task.recurrence === 'daily') {
-    cur.setDate(cur.getDate() + 1);
+function nextDueDate(t) {
+  const cur = new Date(t.dueDate + 'T00:00:00');
+  if (t.recurrence === 'daily') { cur.setDate(cur.getDate() + 1); return ymd(cur); }
+  if (t.recurrence === 'weekly') {
+    const days = (t.recurrenceDays && t.recurrenceDays.length) ? [...t.recurrenceDays].sort((a,b)=>a-b) : [cur.getDay()];
+    const cd = cur.getDay();
+    const nxt = days.find(d => d > cd);
+    if (nxt === undefined) cur.setDate(cur.getDate() + (7 - cd) + days[0]);
+    else cur.setDate(cur.getDate() + (nxt - cd));
     return ymd(cur);
   }
-  if (task.recurrence === 'weekly') {
-    const days = (task.recurrenceDays && task.recurrenceDays.length > 0)
-      ? task.recurrenceDays.slice().sort((a,b)=>a-b)
-      : [cur.getDay()];
-    const curDay = cur.getDay();
-    let nextDay = days.find(d => d > curDay);
-    if (nextDay === undefined) {
-      // wrap to next week
-      cur.setDate(cur.getDate() + (7 - curDay) + days[0]);
-    } else {
-      cur.setDate(cur.getDate() + (nextDay - curDay));
-    }
+  if (t.recurrence === 'monthly') {
+    const td = t.recurrenceDay || cur.getDate();
+    cur.setDate(1); cur.setMonth(cur.getMonth() + 1);
+    cur.setDate(Math.min(td, daysInMonth(cur)));
     return ymd(cur);
   }
-  if (task.recurrence === 'monthly') {
-    const targetDay = task.recurrenceDay || cur.getDate();
-    cur.setDate(1); // avoid month-overflow when adding
-    cur.setMonth(cur.getMonth() + 1);
-    cur.setDate(Math.min(targetDay, daysInMonth(cur)));
-    return ymd(cur);
-  }
-  return task.dueDate;
+  return t.dueDate;
 }
 
-function buildICS(tasks) {
-  const pad = (n) => String(n).padStart(2,'0');
+function detectPurchase(entry) {
+  const text = `${entry.title} ${entry.description || ''}`;
+  const priceMatch = text.match(PRICE_REGEX);
+  const hasKw = PURCHASE_KEYWORDS.test(text); PURCHASE_KEYWORDS.lastIndex = 0;
+  if (!priceMatch && !hasKw) return null;
+  if (!priceMatch) return null;
+
+  const ccy = priceMatch[1] || 'USD';
+  const priceStr = (priceMatch[2] || priceMatch[3] || '0').replace(',', '.');
+  const price = parseFloat(priceStr) || 0;
+
+  let cleanName = entry.title.replace(PURCHASE_KEYWORDS, '').replace(/\s+/g, ' ').trim();
+  PURCHASE_KEYWORDS.lastIndex = 0;
+  cleanName = cleanName.replace(/^[,\-:\s]+|[,\-:\s]+$/g, '');
+  if (!cleanName) cleanName = entry.title;
+
+  return { name: cleanName, price, currency: ccy, date: entry.date, journalEntryId: entry.id, notes: '' };
+}
+
+function buildICS(tasks, includeAlarms = true) {
+  const pad = n => String(n).padStart(2,'0');
   const toICS = (date, time) => {
     const d = new Date(date);
-    if (time) {
-      const [h, m] = time.split(':'); d.setHours(+h, +m, 0, 0);
-      return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
-    }
+    if (time) { const [h,m] = time.split(':'); d.setHours(+h,+m,0,0); return `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`; }
     return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
   };
-  const escIcs = (s) => (s||'').replace(/[\\,;]/g, m => '\\'+m).replace(/\n/g,'\\n');
+  const escIcs = s => (s||'').replace(/[\\,;]/g, m => '\\'+m).replace(/\n/g,'\\n');
   const events = tasks.map(t => {
     const start = toICS(t.dueDate, t.dueTime);
     const startKey = t.dueTime ? `DTSTART:${start}` : `DTSTART;VALUE=DATE:${start}`;
     const endKey   = t.dueTime ? `DTEND:${start}`  : `DTEND;VALUE=DATE:${start}`;
-    return ['BEGIN:VEVENT', `UID:${t.id}@dailyplanner`, `DTSTAMP:${toICS(todayYMD(),'00:00')}`, startKey, endKey, `SUMMARY:${escIcs(t.title)}`, `DESCRIPTION:${escIcs(t.description||'')}`, 'END:VEVENT'].join('\r\n');
+    let alarms = '';
+    if (includeAlarms && t.dueTime) {
+      const offsets = offsetsFor(t).filter(o => o > 0);
+      alarms = offsets.map(o => `BEGIN:VALARM\r\nTRIGGER:-PT${o}M\r\nACTION:DISPLAY\r\nDESCRIPTION:${escIcs(t.title)}\r\nEND:VALARM`).join('\r\n');
+      if (alarms) alarms = '\r\n' + alarms;
+    }
+    return `BEGIN:VEVENT\r\nUID:${t.id}@dailyplanner\r\nDTSTAMP:${toICS(todayYMD(),'00:00')}\r\n${startKey}\r\n${endKey}\r\nSUMMARY:${escIcs(t.title)}\r\nDESCRIPTION:${escIcs(t.description||'')}${alarms}\r\nEND:VEVENT`;
   }).join('\r\n');
-  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DailyPlanner//EN','CALSCALE:GREGORIAN', events, 'END:VCALENDAR'].join('\r\n');
+  return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//DailyPlanner//EN\r\nCALSCALE:GREGORIAN\r\n${events}\r\nEND:VCALENDAR`;
 }
 
 function downloadFile(name, contents, mime='text/plain') {
-  const blob = new Blob([contents], { type: mime });
-  const url = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(new Blob([contents], { type: mime }));
   const a = document.createElement('a');
   a.href = url; a.download = name; a.click();
   URL.revokeObjectURL(url);
 }
 
 function toast(msg, kind='') {
-  const root = document.getElementById('toast-root');
   const el = document.createElement('div');
   el.className = 'toast' + (kind ? ' toast-' + kind : '');
   el.textContent = msg;
-  root.appendChild(el);
+  document.getElementById('toast-root').appendChild(el);
   setTimeout(() => el.remove(), 3500);
 }
+
 const STORAGE_KEY = 'dailyPlanner.v1';
 let storageMode = 'local';
 if (USE_FIREBASE && fb) storageMode = 'firebase';
 else if (typeof window !== 'undefined' && window.storage) storageMode = 'artifact';
 
 async function storageLoad() {
-  if (storageMode === 'local') {
-    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; }
-  }
-  if (storageMode === 'artifact') {
-    try { const res = await window.storage.get(STORAGE_KEY); return res ? JSON.parse(res.value) : null; } catch { return null; }
-  }
+  try {
+    if (storageMode === 'local') { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; }
+    if (storageMode === 'artifact') { const r = await window.storage.get(STORAGE_KEY); return r ? JSON.parse(r.value) : null; }
+  } catch { return null; }
   return null;
 }
 async function storageSave(data) {
-  if (storageMode === 'local') {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { console.error(e); }
-    return;
-  }
-  if (storageMode === 'artifact') {
-    try { await window.storage.set(STORAGE_KEY, JSON.stringify(data)); } catch (e) { console.error(e); }
-    return;
-  }
-  if (storageMode === 'firebase' && state.user && !state.user.isAnonymous) {
-    try {
+  try {
+    if (storageMode === 'local') return localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    if (storageMode === 'artifact') return window.storage.set(STORAGE_KEY, JSON.stringify(data));
+    if (storageMode === 'firebase' && state.user && !state.user.isAnonymous) {
       const ref = fb.fsMod.doc(fb.db, 'users', state.user.uid);
       await fb.fsMod.setDoc(ref, data, { merge: true });
-    } catch (e) { console.error('Firestore save failed:', e); toast('Save failed', 'error'); }
-  }
+    }
+  } catch (e) { console.error('Save failed:', e); toast('Save failed', 'error'); }
 }
+
 const state = {
-  view: 'dashboard',
-  modal: null, search: '',
+  view: 'dashboard', modal: null, search: '',
   taskFilter: 'all', taskCatFilter: 'all',
-  journalDate: todayYMD(),
+  journalDate: '', 
+  journalSearch: '',
+  collectionSort: 'date-desc',
   calendarCursor: (() => { const d = new Date(); d.setDate(1); return d; })(),
   calendarSelected: todayYMD(),
-
   user: null, loaded: false, signingIn: false,
   bootError: null, installPrompt: null,
-
   data: {
     settings: { ...DEFAULT_SETTINGS },
     categories: DEFAULT_CATEGORIES.slice(),
-    entries: [],
-    tasks: [],
+    entries: [], tasks: [], collections: [],
   },
 };
 
@@ -615,125 +461,99 @@ function applyTheme() {
   document.body.setAttribute('data-theme', state.data.settings.theme || 'light');
   document.body.setAttribute('data-accent', state.data.settings.accent || 'coral');
 }
-async function persist() { await storageSave(state.data); }
-function setView(v) { state.view = v; state.modal = null; render(); }
+const persist = () => storageSave(state.data);
+const setView = v => { state.view = v; state.modal = null; render(); };
+const showModal = m => { state.modal = m; render(); };
+const closeModal = () => { state.modal = null; render(); };
 
-// CRUD
 function upsertEntry(e) {
   const i = state.data.entries.findIndex(x => x.id === e.id);
   if (i >= 0) state.data.entries[i] = e; else state.data.entries.push(e);
   persist(); render();
 }
-function deleteEntry(id) {
-  state.data.entries = state.data.entries.filter(e => e.id !== id);
-  persist(); render();
-}
+function deleteEntry(id) { state.data.entries = state.data.entries.filter(e => e.id !== id); persist(); render(); }
 function upsertTask(t) {
   const i = state.data.tasks.findIndex(x => x.id === t.id);
   if (i >= 0) state.data.tasks[i] = t; else state.data.tasks.push(t);
   persist(); render();
 }
-function deleteTask(id) {
-  state.data.tasks = state.data.tasks.filter(t => t.id !== id);
-  persist(); render();
-}
+function deleteTask(id) { state.data.tasks = state.data.tasks.filter(t => t.id !== id); persist(); render(); }
 function toggleTask(id) {
-  const task = state.data.tasks.find(t => t.id === id);
-  if (!task) return;
-
-  // Recurring task being completed → roll forward instead
-  if (!task.completed && task.recurrence && task.recurrence !== 'none') {
-    const next = nextDueDate(task);
-    // Reset reminder state so the next instance can fire fresh notifications
-    state.data.tasks = state.data.tasks.map(t =>
-      t.id === id ? { ...t, dueDate: next, completed: false, remindedKeys: [] } : t
-    );
-    toast(`✓ Moved to ${fmtDate(next, 'medium')}`);
+  const t = state.data.tasks.find(x => x.id === id); if (!t) return;
+  if (!t.completed && t.recurrence && t.recurrence !== 'none') {
+    const next = nextDueDate(t);
+    state.data.tasks = state.data.tasks.map(x => x.id === id ? { ...x, dueDate: next, completed: false, remindedKeys: [] } : x);
+    toast(`Moved to ${fmtDate(next, 'medium')}`);
   } else {
-    state.data.tasks = state.data.tasks.map(t =>
-      t.id === id ? { ...t, completed: !t.completed } : t
-    );
+    state.data.tasks = state.data.tasks.map(x => x.id === id ? { ...x, completed: !x.completed } : x);
   }
   persist(); render();
 }
-function updateSettings(patch) {
-  state.data.settings = { ...state.data.settings, ...patch };
-  applyTheme(); persist(); render();
-}
-function updateCategories(cats) {
-  state.data.categories = cats;
+function upsertCollection(c) {
+  const i = state.data.collections.findIndex(x => x.id === c.id);
+  if (i >= 0) state.data.collections[i] = c; else state.data.collections.push(c);
   persist(); render();
 }
+function deleteCollection(id) { state.data.collections = state.data.collections.filter(c => c.id !== id); persist(); render(); }
+function updateSettings(p) { state.data.settings = { ...state.data.settings, ...p }; applyTheme(); persist(); render(); }
+function updateCategories(c) { state.data.categories = c; persist(); render(); }
+
 async function initFirebaseAuth() {
   if (!fb) return;
-  try { await fb.authMod.getRedirectResult(fb.auth); } catch (e) { console.error('Redirect result:', e); }
-
-  return new Promise((resolve) => {
-    let resolved = false;
-    const done = () => { if (!resolved) { resolved = true; resolve(); } };
-
-    fb.authMod.onAuthStateChanged(fb.auth, async (user) => {
+  try { await fb.authMod.getRedirectResult(fb.auth); } catch (e) { console.error(e); }
+  return new Promise(resolve => {
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    fb.authMod.onAuthStateChanged(fb.auth, async user => {
       if (!user) {
         try { await fb.authMod.signInAnonymously(fb.auth); }
         catch (e) {
-          console.error('Anonymous sign-in failed:', e);
+          console.error(e);
           state.bootError = { title: 'Could not sign in to Firebase', message: friendlyAuthError(e), code: e.code || '' };
-          state.loaded = true; render(); done();
+          state.loaded = true; render(); finish();
         }
         return;
       }
       state.user = user;
-
-      if (user.isAnonymous) {
-        state.loaded = true; state.bootError = null; render(); done(); return;
-      }
-
+      if (user.isAnonymous) { state.loaded = true; state.bootError = null; render(); finish(); return; }
       const ref = fb.fsMod.doc(fb.db, 'users', user.uid);
-      fb.fsMod.onSnapshot(ref, (snap) => {
+      fb.fsMod.onSnapshot(ref, snap => {
         if (snap.exists()) {
           const d = snap.data();
           state.data = {
-            settings:   { ...DEFAULT_SETTINGS, ...(d.settings || {}) },
+            settings: { ...DEFAULT_SETTINGS, ...(d.settings || {}) },
             categories: d.categories || DEFAULT_CATEGORIES.slice(),
-            entries:    d.entries || [],
-            tasks:      d.tasks || [],
+            entries: d.entries || [],
+            tasks: d.tasks || [],
+            collections: d.collections || [],
           };
         } else {
-          state.data = {
-            settings: { ...DEFAULT_SETTINGS },
-            categories: DEFAULT_CATEGORIES.slice(),
-            entries: [], tasks: [],
-          };
+          state.data = { settings: { ...DEFAULT_SETTINGS }, categories: DEFAULT_CATEGORIES.slice(), entries: [], tasks: [], collections: [] };
           persist();
         }
-        applyTheme();
-        state.loaded = true; state.bootError = null;
-        render(); done();
-      }, (err) => {
-        console.error('Snapshot error:', err);
+        applyTheme(); state.loaded = true; state.bootError = null; render(); finish();
+      }, err => {
+        console.error(err);
         state.bootError = { title: 'Could not read your data', message: friendlyFirestoreError(err), code: err.code || '' };
-        state.loaded = true; render(); done();
+        state.loaded = true; render(); finish();
       });
     });
   });
 }
 
 function friendlyAuthError(e) {
-  const code = (e && e.code) || '';
-  if (code === 'auth/operation-not-allowed' || code === 'auth/admin-restricted-operation')
-    return 'Anonymous sign-in isn\'t enabled. Firebase console → Authentication → Sign-in method → enable Anonymous.';
-  if (code === 'auth/unauthorized-domain')
-    return 'This domain isn\'t authorized. Firebase console → Authentication → Settings → Authorized domains.';
-  if (code === 'auth/network-request-failed')
-    return 'Network request failed. If opened via file://, serve over http instead.';
-  return (e && e.message) || 'Unknown error. Check the browser console.';
+  const c = (e && e.code) || '';
+  if (c === 'auth/operation-not-allowed' || c === 'auth/admin-restricted-operation') return 'Anonymous sign-in isn\'t enabled. Firebase console → Authentication → Sign-in method → enable Anonymous.';
+  if (c === 'auth/unauthorized-domain') return 'This domain isn\'t authorized. Firebase console → Authentication → Settings → Authorized domains.';
+  if (c === 'auth/network-request-failed') return 'Network failed. Serve over http(s), not file://.';
+  return (e && e.message) || 'Unknown error.';
 }
 function friendlyFirestoreError(e) {
-  const code = (e && e.code) || '';
-  if (code === 'permission-denied') return 'Firestore denied the request. Set up security rules (see file footer).';
-  if (code === 'unavailable') return 'Firestore is unreachable. Did you create the database?';
-  if (code === 'failed-precondition' || code === 'not-found') return 'No Firestore database. Firebase console → Build → Firestore Database → Create.';
-  return (e && e.message) || 'Unknown Firestore error.';
+  const c = (e && e.code) || '';
+  if (c === 'permission-denied') return 'Firestore denied. Set up security rules (see file footer).';
+  if (c === 'unavailable') return 'Firestore unreachable.';
+  if (c === 'failed-precondition' || c === 'not-found') return 'No Firestore database. Build → Firestore Database → Create.';
+  return (e && e.message) || 'Unknown error.';
 }
 
 async function signInWithGoogle() {
@@ -742,35 +562,30 @@ async function signInWithGoogle() {
   const provider = new fb.authMod.GoogleAuthProvider();
   try {
     if (fb.auth.currentUser && fb.auth.currentUser.isAnonymous) {
-      try {
-        await fb.authMod.linkWithPopup(fb.auth.currentUser, provider);
-        toast('Signed in with Google'); return;
-      } catch (linkErr) {
-        if (linkErr.code !== 'auth/credential-already-in-use' && linkErr.code !== 'auth/email-already-in-use') throw linkErr;
-      }
+      try { await fb.authMod.linkWithPopup(fb.auth.currentUser, provider); toast('Signed in with Google'); return; }
+      catch (le) { if (le.code !== 'auth/credential-already-in-use' && le.code !== 'auth/email-already-in-use') throw le; }
     }
     await fb.authMod.signInWithPopup(fb.auth, provider);
     toast('Signed in with Google');
   } catch (e) {
-    console.error('Google sign-in failed:', e.code, e.message, e);
-    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+    console.error('Google sign-in failed:', e.code, e.message);
+    if (['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(e.code)) {
       try { toast('Popup blocked — redirecting…'); await fb.authMod.signInWithRedirect(fb.auth, provider); return; }
-      catch (redirErr) { console.error('Redirect sign-in also failed:', redirErr); }
+      catch (re) { console.error(re); }
     }
     if (e.code === 'auth/unauthorized-domain') toast('Add this domain to Firebase → Auth → Authorized domains', 'error');
     else toast('Sign-in failed: ' + (e.code || 'see console'), 'error');
-  } finally {
-    state.signingIn = false; render();
-  }
+  } finally { state.signingIn = false; render(); }
 }
 
 async function signOutUser() {
   if (!fb) return;
   await fb.authMod.signOut(fb.auth);
-  state.data = { settings: { ...DEFAULT_SETTINGS }, categories: DEFAULT_CATEGORIES.slice(), entries: [], tasks: [] };
+  state.data = { settings: { ...DEFAULT_SETTINGS }, categories: DEFAULT_CATEGORIES.slice(), entries: [], tasks: [], collections: [] };
   toast('Signed out');
 }
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); state.installPrompt = e; render(); });
+
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); state.installPrompt = e; render(); });
 window.addEventListener('appinstalled', () => { state.installPrompt = null; toast('App installed'); render(); });
 async function triggerInstall() {
   if (state.installPrompt) {
@@ -779,7 +594,31 @@ async function triggerInstall() {
     if (outcome === 'accepted') toast('Installing…');
     state.installPrompt = null; render(); return;
   }
-  state.modal = { type: 'install' }; render();
+  showModal({ type: 'install' });
+}
+
+let alarmCtx = null, alarmInterval = null, alarmTimeout = null;
+function startAlarm() {
+  if (!state.data.settings.audioAlarm) return;
+  if (alarmInterval) return;
+  try {
+    alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const beep = () => {
+      const o = alarmCtx.createOscillator(), g = alarmCtx.createGain();
+      o.connect(g); g.connect(alarmCtx.destination);
+      o.frequency.value = 880;
+      g.gain.setValueAtTime(0.25, alarmCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, alarmCtx.currentTime + 0.4);
+      o.start(); o.stop(alarmCtx.currentTime + 0.4);
+    };
+    beep(); alarmInterval = setInterval(beep, 800);
+    alarmTimeout = setTimeout(stopAlarm, 30000);
+  } catch (e) { console.error('Audio alarm failed:', e); }
+}
+function stopAlarm() {
+  if (alarmInterval) clearInterval(alarmInterval); alarmInterval = null;
+  if (alarmTimeout) clearTimeout(alarmTimeout); alarmTimeout = null;
+  if (alarmCtx) { alarmCtx.close().catch(()=>{}); alarmCtx = null; }
 }
 
 let reminderTimers = [];
@@ -789,40 +628,24 @@ function scheduleReminders() {
   if (!state.data.settings.notificationsEnabled) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const now = Date.now();
-
   state.data.tasks
     .filter(t => t.reminder && !t.completed && t.dueDate && t.dueTime)
     .forEach(task => {
-      const [h, m] = task.dueTime.split(':');
+      const [h,m] = task.dueTime.split(':');
       const dueMs = new Date(task.dueDate + 'T00:00:00').setHours(+h, +m, 0, 0);
-
-      REMINDER_OFFSETS_MIN.forEach(offset => {
-        const fireAt = dueMs - offset * 60 * 1000;
+      offsetsFor(task).forEach(offset => {
+        const fireAt = dueMs - offset * 60000;
         const delta = fireAt - now;
-        // Only schedule reminders that are still in the future and within the next 7 days
-        if (delta > 0 && delta < 7 * 24 * 60 * 60 * 1000) {
-          const remindedKey = `${task.dueDate}-${offset}`;
-          if ((task.remindedKeys || []).includes(remindedKey)) return;
-
+        if (delta > 0 && delta < 7 * 86400000) {
+          const key = `${task.dueDate}-${offset}`;
+          if ((task.remindedKeys || []).includes(key)) return;
           const id = setTimeout(() => {
-            const current = state.data.tasks.find(t => t.id === task.id);
-            if (!current || current.completed) return;
-
-            const label = offset === 0 ? '🔔 Due now'
-                        : offset >= 60 ? `Due in 1 hour`
-                        : `Due in ${offset} minutes`;
-            try {
-              new Notification(label + ': ' + task.title, {
-                body: task.description || `${fmtDate(task.dueDate, 'short')} at ${fmtTime(task.dueTime)}`,
-                tag: `${task.id}-${remindedKey}`,
-                renotify: true,
-              });
-            } catch (e) { console.error('Notify failed:', e); }
-
-            // Mark this offset as reminded
-            state.data.tasks = state.data.tasks.map(t =>
-              t.id === task.id ? { ...t, remindedKeys: [...(t.remindedKeys || []), remindedKey] } : t
-            );
+            const cur = state.data.tasks.find(t => t.id === task.id);
+            if (!cur || cur.completed) return;
+            const label = offset === 0 ? 'Due now' : offset >= 180 ? 'Due in 3 hours' : offset >= 60 ? `Due in ${offset/60} hour${offset>60?'s':''}` : `Due in ${offset} minutes`;
+            try { new Notification(label + ': ' + task.title, { body: task.description || `${fmtDate(task.dueDate,'short')} at ${fmtTime(task.dueTime)}`, tag: `${task.id}-${key}`, renotify: true }); } catch (e) { console.error(e); }
+            if (task.alarm) startAlarm();
+            state.data.tasks = state.data.tasks.map(t => t.id === task.id ? { ...t, remindedKeys: [...(t.remindedKeys || []), key] } : t);
             persist();
           }, delta);
           reminderTimers.push(id);
@@ -832,83 +655,68 @@ function scheduleReminders() {
 }
 
 async function requestNotifications() {
-  if (!('Notification' in window)) { alert('Browser does not support notifications.'); return; }
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted') {
+  if (!('Notification' in window)) { await ask({ title: 'Not supported', message: 'This browser does not support notifications.', confirmText: 'OK', single: true }); return; }
+  const p = await Notification.requestPermission();
+  if (p === 'granted') {
     updateSettings({ notificationsEnabled: true });
-    try { new Notification('Reminders enabled', { body: 'You\'ll be notified 1 hour, 30 min, 10 min, and at the due time.' }); } catch {}
-  } else {
-    toast('Notifications denied');
-  }
+    try { new Notification('Reminders enabled', { body: 'You\'ll get notifications based on your task category.' }); } catch {}
+  } else toast('Notifications denied');
 }
 
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && state.loaded) scheduleReminders();
-});
+document.addEventListener('visibilitychange', () => { if (!document.hidden && state.loaded) scheduleReminders(); });
 
-const ICON = (name, attrs='') => `<i data-lucide="${name}" ${attrs}></i>`;
-function refreshIcons() { if (window.lucide) window.lucide.createIcons(); }
-const GOOGLE_G_SVG = `
-<svg class="google-g" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-  <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
-  <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
-  <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
-  <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
-</svg>`;
+const ICON = (n, a='') => `<i data-lucide="${n}" ${a}></i>`;
+const refreshIcons = () => { if (window.lucide) window.lucide.createIcons(); };
+
+const GOOGLE_G_SVG = `<svg class="google-g" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>`;
+
+function ask({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', danger = false, single = false, kind = 'warn' }) {
+  return new Promise(resolve => {
+    showModal({ type: 'confirm', title, message, confirmText, cancelText, danger, single, kind, resolve });
+  });
+}
+
 function render() {
   const app = document.getElementById('app');
+
   if (!state.loaded) {
     app.className = 'full';
-    app.innerHTML = `
-      <div class="boot-screen">
-        <div class="boot-card">
-          <div class="spinner"></div>
-          <div class="boot-logo">Daily<span>.</span></div>
-          <div style="color:var(--text-dim);font-size:13px">Loading…</div>
-        </div>
-      </div>`;
+    app.innerHTML = `<div class="boot-screen"><div class="boot-card"><div class="spinner"></div><div class="boot-logo">Daily<span>.</span></div><div style="color:var(--text-dim);font-size:13px">Loading…</div></div></div>`;
     return;
   }
   if (state.bootError) {
     app.className = 'full';
-    app.innerHTML = `
-      <div class="boot-screen">
-        <div class="boot-card" style="text-align:left">
-          <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin-bottom:8px;color:var(--accent)">${esc(state.bootError.title)}</div>
-          <div style="color:var(--text);font-size:14px;line-height:1.55;margin-bottom:14px">${esc(state.bootError.message)}</div>
-          ${state.bootError.code ? `<div class="mono" style="font-size:12px;color:var(--text-dim);background:var(--surface-2);padding:8px 10px;border-radius:6px;margin-bottom:14px">code: ${esc(state.bootError.code)}</div>` : ''}
-          <button class="btn btn-primary" data-action="reload" style="width:100%">Reload</button>
-        </div>
-      </div>`;
-    refreshIcons();
-    return;
+    app.innerHTML = `<div class="boot-screen"><div class="boot-card" style="text-align:left">
+      <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin-bottom:8px;color:var(--accent)">${esc(state.bootError.title)}</div>
+      <div style="color:var(--text);font-size:14px;line-height:1.55;margin-bottom:14px">${esc(state.bootError.message)}</div>
+      ${state.bootError.code ? `<div class="mono" style="font-size:12px;color:var(--text-dim);background:var(--surface-2);padding:8px 10px;border-radius:6px;margin-bottom:14px">code: ${esc(state.bootError.code)}</div>` : ''}
+      <button class="btn btn-primary" data-action="reload" style="width:100%">Reload</button>
+    </div></div>`;
+    refreshIcons(); return;
   }
   if (storageMode === 'firebase' && state.user && state.user.isAnonymous) {
     document.getElementById('mobile-nav')?.remove();
     document.getElementById('fab')?.remove();
     app.className = 'full';
     app.innerHTML = renderSignInGate();
-    refreshIcons();
-    return;
+    refreshIcons(); return;
   }
+
   app.className = '';
   app.innerHTML = `${renderSidebar()}${renderMain()}`;
 
   let mn = document.getElementById('mobile-nav');
   if (!mn) { mn = document.createElement('nav'); mn.id = 'mobile-nav'; mn.className = 'mobile-nav'; document.body.appendChild(mn); }
-  mn.innerHTML = NAV_ITEMS.map(n => `
-    <button class="${state.view === n.id ? 'active' : ''}" data-action="nav" data-view="${n.id}">
-      ${ICON(n.icon)}<span>${n.label}</span>
-    </button>`).join('');
+  mn.innerHTML = NAV_ITEMS.map(n => `<button class="${state.view === n.id ? 'active' : ''}" data-action="nav" data-view="${n.id}">${ICON(n.icon)}<span>${n.label}</span></button>`).join('');
 
   let fab = document.getElementById('fab');
   if (!fab) { fab = document.createElement('button'); fab.id = 'fab'; fab.className = 'fab'; document.body.appendChild(fab); }
-  const fabType = state.view === 'journal' ? 'entry' : 'task';
-  const fabLabel = fabType === 'entry' ? 'Log a moment' : 'New task';
+  const fabType = state.view === 'journal' ? 'entry' : state.view === 'collection' ? 'collection' : 'task';
+  const fabLabel = fabType === 'entry' ? 'Log a moment' : fabType === 'collection' ? 'Add item' : 'New task';
   fab.dataset.action = 'open-modal';
   fab.dataset.modalType = fabType;
   fab.innerHTML = `${ICON('plus')}<span>${fabLabel}</span>`;
-  fab.style.display = ['settings'].includes(state.view) ? 'none' : 'flex';
+  fab.style.display = state.view === 'settings' ? 'none' : 'flex';
 
   renderModal();
   refreshIcons();
@@ -917,735 +725,625 @@ function render() {
 
 function renderSignInGate() {
   const installable = state.installPrompt || (isIOS() && !isStandaloneInstalled());
-  return `
-    <div class="boot-screen">
-      <div class="boot-card anim-slide">
-        <div class="boot-logo">Daily<span>.</span></div>
-        <div class="boot-tagline">Your personal journal &amp; task planner</div>
-        ${state.signingIn ? `
-          <button class="google-btn" disabled style="opacity:0.7">
-            <div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0"></div>
-            Signing in…
-          </button>
-        ` : `
-          <button class="google-btn" data-action="google-signin">${GOOGLE_G_SVG} Continue with Google</button>
-        `}
-        <div style="font-size:12px;color:var(--text-faint);margin-top:18px;line-height:1.5">
-          Sign in to sync your data across devices. Your tasks and journal entries stay private to you.
-        </div>
-        ${installable ? `
-          <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
-            <button class="btn btn-ghost" data-action="trigger-install" style="width:100%">${ICON('download')} Install as app</button>
-            <div style="font-size:11px;color:var(--text-faint);margin-top:8px">Add Daily to your home screen for a full-screen experience</div>
-          </div>
-        ` : ''}
-      </div>
-    </div>`;
+  return `<div class="boot-screen"><div class="boot-card anim-slide">
+    <div class="boot-logo">Daily<span>.</span></div>
+    <div class="boot-tagline">Your personal journal &amp; task planner</div>
+    ${state.signingIn
+      ? `<button class="google-btn" disabled style="opacity:0.7"><div class="spinner" style="width:18px;height:18px;border-width:2px;margin:0"></div>Signing in…</button>`
+      : `<button class="google-btn" data-action="google-signin">${GOOGLE_G_SVG} Continue with Google</button>`}
+    <div style="font-size:12px;color:var(--text-faint);margin-top:18px;line-height:1.5">Sign in to sync your data across devices.</div>
+    ${installable ? `<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+      <button class="btn btn-ghost" data-action="trigger-install" style="width:100%">${ICON('download')} Install as app</button>
+      <div style="font-size:11px;color:var(--text-faint);margin-top:8px">Add Daily to your home screen</div>
+    </div>` : ''}
+  </div></div>`;
 }
 
 function renderSidebar() {
-  const displayName = state.user?.displayName || state.user?.email?.split('@')[0] || 'You';
-  return `
-    <aside class="sidebar">
-      <div class="brand">
-        <h1 class="display">Daily<span>.</span></h1>
-        <small>Planner &amp; Journal</small>
-      </div>
-      ${NAV_ITEMS.map(n => `
-        <button class="nav-item ${state.view === n.id ? 'active' : ''}" data-action="nav" data-view="${n.id}">${ICON(n.icon)} ${n.label}</button>
-      `).join('')}
-      <div class="credit">
-        Signed in as <strong style="color:var(--text-dim)">${esc(displayName)}</strong><br>
-        ☁ Synced via Firebase
-      </div>
-    </aside>`;
+  const name = state.user?.displayName || state.user?.email?.split('@')[0] || 'You';
+  return `<aside class="sidebar">
+    <div class="brand"><h1 class="display">Daily<span>.</span></h1><small>Planner &amp; Journal</small></div>
+    ${NAV_ITEMS.map(n => `<button class="nav-item ${state.view === n.id ? 'active' : ''}" data-action="nav" data-view="${n.id}">${ICON(n.icon)} ${n.label}</button>`).join('')}
+    <div class="credit">Signed in as <strong style="color:var(--text-dim)">${esc(name)}</strong><br>☁ Synced via Firebase</div>
+  </aside>`;
 }
 
 function renderMain() {
-  const labels = { dashboard: 'Today at a glance', journal: 'Journal', tasks: 'Tasks', calendar: 'Calendar', history: 'History', settings: 'Settings' };
-  return `
-    <main>
-      <header class="topbar">
-        <div>
-          <div class="date">${esc(fmtDate(new Date(), 'long'))}</div>
-          <h2 class="display">${esc(labels[state.view] || '')}</h2>
-        </div>
-        <button class="icon-btn" data-action="toggle-theme" title="Toggle theme">
-          ${ICON(state.data.settings.theme === 'dark' ? 'sun' : 'moon')}
-        </button>
-      </header>
-      <div class="view">${renderViewBody()}</div>
-    </main>`;
+  const labels = { dashboard:'Today at a glance', journal:'Journal', tasks:'Tasks', collection:'Collection', calendar:'Calendar', history:'History', settings:'Settings' };
+  return `<main>
+    <header class="topbar">
+      <div><div class="date">${esc(fmtDate(new Date(),'long'))}</div><h2 class="display">${esc(labels[state.view]||'')}</h2></div>
+      <button class="icon-btn" data-action="toggle-theme" title="Toggle theme">${ICON(state.data.settings.theme === 'dark' ? 'sun' : 'moon')}</button>
+    </header>
+    <div class="view">${renderViewBody()}</div>
+  </main>`;
 }
 
 function renderViewBody() {
   const v = state.view;
-  if (v === 'dashboard') return renderDashboard();
-  if (v === 'journal')   return renderJournal();
-  if (v === 'tasks')     return renderTasks();
-  if (v === 'calendar')  return renderCalendar();
-  if (v === 'history')   return renderHistory();
-  if (v === 'settings')  return renderSettings();
-  return '';
+  return v === 'dashboard' ? renderDashboard()
+    : v === 'journal' ? renderJournal()
+    : v === 'tasks' ? renderTasks()
+    : v === 'collection' ? renderCollection()
+    : v === 'calendar' ? renderCalendar()
+    : v === 'history' ? renderHistory()
+    : v === 'settings' ? renderSettings() : '';
 }
+
 function renderDashboard() {
   const t = todayYMD(), tm = tomorrowYMD();
-  const todayEntries = state.data.entries.filter(e => e.date === t).sort((a,b) => (b.time||'').localeCompare(a.time||''));
-  const todayTasks   = state.data.tasks.filter(t2 => t2.dueDate === t);
-  const tomorrowTasks = state.data.tasks.filter(t2 => t2.dueDate === tm);
-  const overdue = state.data.tasks.filter(t2 => !t2.completed && t2.dueDate < t);
-
-  const todayDone = todayTasks.filter(t2 => t2.completed).length;
-  const completion = todayTasks.length > 0 ? Math.round((todayDone / todayTasks.length) * 100) : 0;
-  const remaining = todayTasks.filter(t2 => !t2.completed).length;
+  const todayEntries = state.data.entries.filter(e => e.date === t).sort((a,b)=>(b.time||'').localeCompare(a.time||''));
+  const todayTasks = state.data.tasks.filter(x => x.dueDate === t);
+  const tomorrowTasks = state.data.tasks.filter(x => x.dueDate === tm);
+  const overdue = state.data.tasks.filter(x => !x.completed && x.dueDate < t);
+  const todayDone = todayTasks.filter(x => x.completed).length;
+  const completion = todayTasks.length ? Math.round((todayDone/todayTasks.length)*100) : 0;
+  const remaining = todayTasks.filter(x => !x.completed).length;
 
   const days = [];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
+    const d = new Date(); d.setDate(d.getDate()-i);
     const ds = ymd(d);
-    const dt = state.data.tasks.filter(t2 => t2.dueDate === ds);
-    days.push({ date: ds, label: d.toLocaleDateString(undefined, { weekday: 'short' })[0], total: dt.length, done: dt.filter(t2 => t2.completed).length });
+    const dt = state.data.tasks.filter(x => x.dueDate === ds);
+    days.push({ date: ds, label: d.toLocaleDateString(undefined,{weekday:'short'})[0], total: dt.length, done: dt.filter(x=>x.completed).length });
   }
   const maxH = Math.max(...days.map(d => d.total), 3);
 
-  const showInstallBanner =
-    !state.data.settings.hideInstallBanner &&
-    !isStandaloneInstalled() &&
-    (state.installPrompt || isIOS());
+  const showInstall = !state.data.settings.hideInstallBanner && !isStandaloneInstalled() && (state.installPrompt || isIOS());
 
-  return `
-    ${showInstallBanner ? `
-      <div class="install-banner anim-slide">
-        ${ICON('smartphone')}
-        <div style="flex:1">
-          <strong>Install Daily on your phone</strong><br>
-          <span style="opacity:0.85;font-size:12px">Get a full-screen app experience</span>
-        </div>
-        <button class="btn-light" data-action="trigger-install">Install</button>
-        <button class="x" data-action="hide-install-banner">${ICON('x')}</button>
-      </div>` : ''}
+  return `${showInstall ? `<div class="install-banner anim-slide">${ICON('smartphone')}<div style="flex:1"><strong>Install Daily on your phone</strong><br><span style="opacity:0.85;font-size:12px">Full-screen app experience</span></div><button class="btn-light" data-action="trigger-install">Install</button><button class="x" data-action="hide-install-banner">${ICON('x')}</button></div>` : ''}
 
-    <div class="col-stack" style="max-width:1100px">
-      <section class="hero anim-slide">
-        <div class="greeting">${esc(greeting())}${state.data.settings.displayName ? ', '+esc(state.data.settings.displayName) : ''}.</div>
-        <h2 class="display">${state.data.tasks.length === 0 && state.data.entries.length === 0
-          ? `Your planner is <em>empty</em>. Tap the + button to begin.`
-          : `You have <em>${remaining}</em> ${remaining === 1 ? 'thing' : 'things'} left today${tomorrowTasks.length > 0 ? `, and <em>${tomorrowTasks.length}</em> waiting for tomorrow.` : '.'}`}
-        </h2>
-      </section>
+<div class="col-stack" style="max-width:1100px">
+  <section class="hero anim-slide">
+    <div class="greeting">${esc(greeting())}${state.data.settings.displayName ? ', '+esc(state.data.settings.displayName) : ''}.</div>
+    <h2 class="display">${state.data.tasks.length === 0 && state.data.entries.length === 0
+      ? `Your planner is <em>empty</em>. Tap the + button to begin.`
+      : `You have <em>${remaining}</em> ${remaining===1?'thing':'things'} left today${tomorrowTasks.length>0?`, and <em>${tomorrowTasks.length}</em> waiting for tomorrow.`:'.'}`}</h2>
+  </section>
 
-      <section class="grid-stats">
-        ${statCard('target',        "Today's progress", completion + '%', `${todayDone}/${todayTasks.length} done`, 0)}
-        ${statCard('book-open',     'Logged today',     todayEntries.length, 'journal entries', 0.05)}
-        ${statCard('alert-circle',  'Overdue',          overdue.length, overdue.length === 0 ? 'all clear' : 'need action', 0.1)}
-        ${statCard('trending-up',   'Tomorrow',         tomorrowTasks.length, 'tasks queued', 0.15)}
-      </section>
+  <section class="grid-stats">
+    ${statCard('target',"Today's progress",completion+'%',`${todayDone}/${todayTasks.length} done`,0)}
+    ${statCard('book-open','Logged today',todayEntries.length,'journal entries',0.05)}
+    ${statCard('alert-circle','Overdue',overdue.length,overdue.length===0?'all clear':'need action',0.1)}
+    ${statCard('trending-up','Tomorrow',tomorrowTasks.length,'tasks queued',0.15)}
+  </section>
 
-      <section class="grid-twocol">
-        <div class="card anim-slide">
-          <header>
-            <div><h3>Today's tasks</h3><div class="sub">${todayTasks.length} total</div></div>
-            <button class="card-link" data-action="nav" data-view="tasks">View all →</button>
-          </header>
-          ${todayTasks.length === 0
-            ? `<div class="empty"><div class="desc">Nothing scheduled for today. Tap + to add a task.</div></div>`
-            : `<div class="stack-sm">${todayTasks.slice(0, 5).map(t2 => taskRowHTML(t2, true)).join('')}</div>`}
-        </div>
-        <div class="card anim-slide">
-          <header><div><h3>Last 7 days</h3><div class="sub">completion trend</div></div></header>
-          <div style="display:flex;align-items:flex-end;gap:8px;height:100px;padding:12px 4px 4px">
-            ${days.map((d, i) => {
-              const totalH = (d.total / maxH) * 80;
-              const doneFrac = d.total > 0 ? (d.done / d.total) : 0;
-              return `
-                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
-                  <div style="width:100%;height:80px;display:flex;flex-direction:column;justify-content:flex-end">
-                    <div style="width:100%;height:${totalH || 4}px;background:var(--border);border-radius:4px;position:relative">
-                      <div style="position:absolute;bottom:0;left:0;right:0;height:${doneFrac * 100}%;background:var(--accent);border-radius:4px"></div>
-                    </div>
-                  </div>
-                  <div class="mono" style="font-size:10px;color:${i === 6 ? 'var(--accent)' : 'var(--text-dim)'};font-weight:${i === 6 ? 700 : 500}">${d.label}</div>
-                </div>`;
-            }).join('')}
-          </div>
-        </div>
-      </section>
+  <section class="grid-twocol">
+    <div class="card anim-slide">
+      <header><div><h3>Today's tasks</h3><div class="sub">${todayTasks.length} total</div></div><button class="card-link" data-action="nav" data-view="tasks">View all →</button></header>
+      ${todayTasks.length === 0 ? `<div class="empty"><div class="desc">Nothing today. Tap + to add a task.</div></div>` : `<div class="stack-sm">${todayTasks.slice(0,5).map(x=>taskRowHTML(x,true)).join('')}</div>`}
+    </div>
+    <div class="card anim-slide">
+      <header><div><h3>Last 7 days</h3><div class="sub">completion trend</div></div></header>
+      <div style="display:flex;align-items:flex-end;gap:8px;height:100px;padding:12px 4px 4px">
+        ${days.map((d,i)=>{const tH=(d.total/maxH)*80;const df=d.total>0?(d.done/d.total):0;return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px"><div style="width:100%;height:80px;display:flex;flex-direction:column;justify-content:flex-end"><div style="width:100%;height:${tH||4}px;background:var(--border);border-radius:4px;position:relative"><div style="position:absolute;bottom:0;left:0;right:0;height:${df*100}%;background:var(--accent);border-radius:4px"></div></div></div><div class="mono" style="font-size:10px;color:${i===6?'var(--accent)':'var(--text-dim)'};font-weight:${i===6?700:500}">${d.label}</div></div>`;}).join('')}
+      </div>
+    </div>
+  </section>
 
-      <section class="card anim-slide">
-        <header>
-          <div><h3>Tomorrow's plan</h3><div class="sub">${tomorrowTasks.length} ${tomorrowTasks.length === 1 ? 'task' : 'tasks'} queued</div></div>
-          <button class="card-link" data-action="nav" data-view="tasks">Plan day →</button>
-        </header>
-        ${tomorrowTasks.length === 0
-          ? `<div class="empty"><div class="desc">Tomorrow's still blank — tap + to plan ahead.</div></div>`
-          : `<div class="stack-sm">${tomorrowTasks.map(t2 => taskRowHTML(t2, true)).join('')}</div>`}
-      </section>
+  <section class="card anim-slide">
+    <header><div><h3>Tomorrow's plan</h3><div class="sub">${tomorrowTasks.length} ${tomorrowTasks.length===1?'task':'tasks'}</div></div><button class="card-link" data-action="nav" data-view="tasks">Plan day →</button></header>
+    ${tomorrowTasks.length === 0 ? `<div class="empty"><div class="desc">Tomorrow's blank — tap + to plan ahead.</div></div>` : `<div class="stack-sm">${tomorrowTasks.map(x=>taskRowHTML(x,true)).join('')}</div>`}
+  </section>
 
-      <section class="card anim-slide">
-        <header>
-          <div><h3>Today's journal</h3><div class="sub">${todayEntries.length} ${todayEntries.length === 1 ? 'entry' : 'entries'}</div></div>
-          <button class="card-link" data-action="nav" data-view="journal">Open journal →</button>
-        </header>
-        ${todayEntries.length === 0
-          ? `<div class="empty"><div class="desc">No entries yet today. Tap + to log something.</div></div>`
-          : `<div class="stack-sm">${todayEntries.slice(0, 3).map(entryCardHTML).join('')}</div>`}
-      </section>
-    </div>`;
+  <section class="card anim-slide">
+    <header><div><h3>Today's journal</h3><div class="sub">${todayEntries.length} ${todayEntries.length===1?'entry':'entries'}</div></div><button class="card-link" data-action="nav" data-view="journal">Open journal →</button></header>
+    ${todayEntries.length === 0 ? `<div class="empty"><div class="desc">No entries today. Tap + to log something.</div></div>` : `<div class="stack-sm">${todayEntries.slice(0,3).map(entryCardHTML).join('')}</div>`}
+  </section>
+</div>`;
 }
 
 function statCard(icon, label, value, sub, delay) {
-  return `
-    <div class="stat-card anim-slide" style="animation-delay:${delay}s">
-      <div class="label">${ICON(icon)} ${esc(label)}</div>
-      <div class="value display">${esc(String(value))}</div>
-      <div class="sub">${esc(sub)}</div>
-    </div>`;
-}
-function renderJournal() {
-  const date = state.journalDate;
-  const entries = state.data.entries.filter(e => e.date === date).sort((a,b) => (b.time||'').localeCompare(a.time||''));
-  return `
-    <div style="max-width:800px">
-      <div class="row-wrap" style="margin-bottom:20px">
-        <input type="date" value="${esc(date)}" class="input" style="width:auto" data-action="set-journal-date" />
-        <button class="btn btn-ghost" data-action="journal-today">Today</button>
-        <div class="spacer"></div>
-        <div style="font-size:12px;color:var(--text-dim)">${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}</div>
-      </div>
-      ${entries.length === 0 ? `
-        <div class="empty">${ICON('book-open')}
-          <div class="title">Nothing logged for this day</div>
-          <div class="desc">Tap the + button to add a moment.</div>
-        </div>
-      ` : `<div class="timeline stack-sm" style="gap:16px">${entries.map(entryCardHTML).join('')}</div>`}
-    </div>`;
+  return `<div class="stat-card anim-slide" style="animation-delay:${delay}s"><div class="label">${ICON(icon)} ${esc(label)}</div><div class="value display">${esc(String(value))}</div><div class="sub">${esc(sub)}</div></div>`;
 }
 
-function entryCardHTML(entry) {
-  const cat = state.data.categories.find(c => c.id === entry.category);
-  const mood = MOODS.find(m => m.id === entry.mood);
-  return `
-    <article class="entry-card anim-fade">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-        <div style="flex:1;min-width:0">
-          <div class="meta-line">
-            ${entry.time ? `<span class="mono" style="font-size:12px;color:var(--text-dim)">${esc(fmtTime(entry.time))}</span>` : ''}
-            ${cat ? `<span class="chip" style="background:${cat.color}20;color:${cat.color}"><span class="dot" style="background:${cat.color}"></span>${esc(cat.name)}</span>` : ''}
-            ${mood ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text-dim)">${ICON(mood.icon)} ${esc(mood.label)}</span>` : ''}
-          </div>
-          <div class="title display">${esc(entry.title)}</div>
-          ${entry.description ? `<div class="desc">${esc(entry.description)}</div>` : ''}
-        </div>
-        <div style="display:flex;gap:4px">
-          <button style="background:transparent;border:none;color:var(--text-dim);padding:6px" data-action="edit-entry" data-id="${entry.id}">${ICON('edit-3')}</button>
-          <button style="background:transparent;border:none;color:var(--text-dim);padding:6px" data-action="delete-entry" data-id="${entry.id}">${ICON('trash-2')}</button>
-        </div>
-      </div>
-    </article>`;
+function renderJournal() {
+  const q = state.journalSearch.toLowerCase();
+  let entries = state.data.entries.slice();
+  if (state.journalDate) entries = entries.filter(e => e.date === state.journalDate);
+  if (q) entries = entries.filter(e => (e.title||'').toLowerCase().includes(q) || (e.description||'').toLowerCase().includes(q));
+  entries.sort((a,b) => (b.date+(b.time||'')).localeCompare(a.date+(a.time||'')));
+
+  const groups = {};
+  entries.forEach(e => { (groups[e.date] = groups[e.date] || []).push(e); });
+  const groupKeys = Object.keys(groups).sort((a,b) => b.localeCompare(a));
+
+  return `<div style="max-width:800px">
+    <div class="row-wrap" style="margin-bottom:16px">
+      <input type="date" value="${esc(state.journalDate)}" class="input" style="width:auto" data-action="set-journal-date" placeholder="Jump to date" />
+      ${state.journalDate ? `<button class="btn btn-ghost" data-action="journal-clear-date">Show all</button>` : ''}
+      <button class="btn btn-ghost" data-action="journal-today">Today</button>
+      <div class="spacer"></div>
+      <div style="font-size:12px;color:var(--text-dim)">${entries.length} ${entries.length===1?'entry':'entries'}</div>
+    </div>
+    <div style="position:relative;margin-bottom:16px">
+      ${ICON('search','style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none"')}
+      <input type="text" class="input" placeholder="Search your journal…" value="${esc(state.journalSearch)}" data-action="set-journal-search" style="padding-left:40px" />
+    </div>
+    ${entries.length === 0 ? `<div class="empty">${ICON('book-open')}<div class="title">${state.journalSearch ? 'No matches' : state.journalDate ? 'Nothing logged' : 'Journal is empty'}</div><div class="desc">${state.journalSearch ? 'Try another search term.' : 'Tap the + button to add your first entry.'}</div></div>`
+    : `<div class="col-stack" style="gap:24px">${groupKeys.map(date => `<div>
+        <div class="date-header"><span>${esc(fmtDate(date,'long'))}</span><span></span><span>${groups[date].length}</span></div>
+        <div class="timeline stack-sm" style="gap:16px">${groups[date].map(entryCardHTML).join('')}</div>
+      </div>`).join('')}</div>`}
+  </div>`;
 }
+
+function entryCardHTML(e) {
+  const cat = state.data.categories.find(c => c.id === e.category);
+  const mood = MOODS.find(m => m.id === e.mood);
+  return `<article class="entry-card anim-fade">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+      <div style="flex:1;min-width:0">
+        <div class="meta-line">
+          ${e.time ? `<span class="mono" style="font-size:12px;color:var(--text-dim)">${esc(fmtTime(e.time))}</span>` : ''}
+          ${cat ? `<span class="chip" style="background:${cat.color}20;color:${cat.color}"><span class="dot" style="background:${cat.color}"></span>${esc(cat.name)}</span>` : ''}
+          ${mood ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text-dim)">${ICON(mood.icon)} ${esc(mood.label)}</span>` : ''}
+        </div>
+        <div class="title display">${esc(e.title)}</div>
+        ${e.description ? `<div class="desc">${esc(e.description)}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:4px">
+        <button style="background:transparent;color:var(--text-dim);padding:6px" data-action="edit-entry" data-id="${e.id}">${ICON('edit-3')}</button>
+        <button style="background:transparent;color:var(--text-dim);padding:6px" data-action="delete-entry" data-id="${e.id}">${ICON('trash-2')}</button>
+      </div>
+    </div>
+  </article>`;
+}
+
 function renderTasks() {
   const today = todayYMD(), tm = tomorrowYMD();
   let list = state.data.tasks.slice();
-  if (state.taskFilter === 'today')         list = list.filter(t => t.dueDate === today && !t.completed);
+  if (state.taskFilter === 'today') list = list.filter(t => t.dueDate === today && !t.completed);
   else if (state.taskFilter === 'tomorrow') list = list.filter(t => t.dueDate === tm && !t.completed);
-  else if (state.taskFilter === 'overdue')  list = list.filter(t => !t.completed && t.dueDate < today);
+  else if (state.taskFilter === 'overdue') list = list.filter(t => !t.completed && t.dueDate < today);
   else if (state.taskFilter === 'recurring') list = list.filter(t => t.recurrence && t.recurrence !== 'none');
-  else if (state.taskFilter === 'done')     list = list.filter(t => t.completed);
-  else                                       list = list.filter(t => !t.completed);
+  else if (state.taskFilter === 'done') list = list.filter(t => t.completed);
+  else list = list.filter(t => !t.completed);
   if (state.taskCatFilter !== 'all') list = list.filter(t => t.category === state.taskCatFilter);
-  list.sort((a, b) => a.dueDate.localeCompare(b.dueDate) || (a.dueTime || '99:99').localeCompare(b.dueTime || '99:99'));
+  list.sort((a,b) => a.dueDate.localeCompare(b.dueDate) || (a.dueTime||'99:99').localeCompare(b.dueTime||'99:99'));
+  const groups = {}; list.forEach(t => { (groups[t.dueDate] = groups[t.dueDate] || []).push(t); });
+  const FILTERS = [{id:'all',label:'All open'},{id:'today',label:'Today'},{id:'tomorrow',label:'Tomorrow'},{id:'overdue',label:'Overdue'},{id:'recurring',label:'Recurring'},{id:'done',label:'Completed'}];
 
-  const groups = {};
-  list.forEach(t => { (groups[t.dueDate] = groups[t.dueDate] || []).push(t); });
-
-  const FILTERS = [
-    { id: 'all', label: 'All open' },
-    { id: 'today', label: 'Today' },
-    { id: 'tomorrow', label: 'Tomorrow' },
-    { id: 'overdue', label: 'Overdue' },
-    { id: 'recurring', label: 'Recurring' },
-    { id: 'done', label: 'Completed' },
-  ];
-
-  return `
-    <div style="max-width:900px">
-      <div class="row-wrap" style="margin-bottom:16px">
-        ${FILTERS.map(f => `<button class="pill ${state.taskFilter === f.id ? 'active' : ''}" data-action="set-task-filter" data-filter="${f.id}">${f.label}</button>`).join('')}
-        <div class="spacer"></div>
-        <select class="pill" style="padding-right:28px" data-action="set-task-cat">
-          <option value="all" ${state.taskCatFilter === 'all' ? 'selected' : ''}>All categories</option>
-          ${state.data.categories.map(c => `<option value="${esc(c.id)}" ${state.taskCatFilter === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
-        </select>
-        <button class="pill" data-action="export-ics" title="Export to calendar">${ICON('download')} Export .ics</button>
-      </div>
-      ${list.length === 0 ? `
-        <div class="empty">${ICON('list-todo')}
-          <div class="title">No tasks here</div>
-          <div class="desc">Tap the + button to add one.</div>
-        </div>
-      ` : `
-        <div class="col-stack" style="gap:20px">
-          ${Object.entries(groups).map(([d, items]) => `
-            <div>
-              <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-                <span>${esc(fmtDate(d, 'long'))}</span>
-                <span style="flex:1;height:1px;background:var(--border)"></span>
-                <span>${items.length}</span>
-              </div>
-              <div class="stack-sm">${items.map(t => taskRowHTML(t, false)).join('')}</div>
-            </div>
-          `).join('')}
-        </div>
-      `}
-    </div>`;
+  return `<div style="max-width:900px">
+    <div class="row-wrap" style="margin-bottom:16px">
+      ${FILTERS.map(f => `<button class="pill ${state.taskFilter===f.id?'active':''}" data-action="set-task-filter" data-filter="${f.id}">${f.label}</button>`).join('')}
+      <div class="spacer"></div>
+      <select class="pill" style="padding-right:28px" data-action="set-task-cat">
+        <option value="all" ${state.taskCatFilter==='all'?'selected':''}>All categories</option>
+        ${state.data.categories.map(c => `<option value="${esc(c.id)}" ${state.taskCatFilter===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
+      </select>
+      <button class="pill" data-action="export-ics" title="Calendar with alarms">${ICON('download')} Export .ics</button>
+    </div>
+    ${list.length === 0 ? `<div class="empty">${ICON('list-todo')}<div class="title">No tasks here</div><div class="desc">Tap the + button to add one.</div></div>`
+    : `<div class="col-stack" style="gap:20px">${Object.entries(groups).map(([d,items]) => `<div>
+        <div class="date-header"><span>${esc(fmtDate(d,'long'))}</span><span></span><span>${items.length}</span></div>
+        <div class="stack-sm">${items.map(t=>taskRowHTML(t,false)).join('')}</div>
+      </div>`).join('')}</div>`}
+  </div>`;
 }
 
 function taskRowHTML(task, compact) {
   const cat = state.data.categories.find(c => c.id === task.category);
   const pri = PRIORITIES[task.priority] || PRIORITIES.low;
-  const isOverdue = !task.completed && task.dueDate < todayYMD();
-  const recurLabel = describeRecurrence(task);
-  return `
-    <div class="task-row ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''} anim-fade" style="border-left-color:${pri.color}">
-      <button class="check" data-action="toggle-task" data-id="${task.id}">${ICON(task.completed ? 'check-circle-2' : 'circle')}</button>
-      <div class="body">
-        <div class="title-line">
-          <span class="title">${esc(task.title)}</span>
-          ${task.dueTime ? `<span class="meta mono">${ICON('clock')} ${esc(fmtTime(task.dueTime))}</span>` : ''}
-          ${cat ? `<span class="chip" style="background:${cat.color}20;color:${cat.color}"><span class="dot" style="background:${cat.color}"></span>${esc(cat.name)}</span>` : ''}
-          ${task.reminder && !task.completed ? `<span style="color:var(--accent);display:inline-flex" title="Reminder set">${ICON('bell')}</span>` : ''}
-          ${recurLabel ? `<span class="meta" style="color:var(--accent)">${ICON('repeat')} ${esc(recurLabel)}</span>` : ''}
-          ${isOverdue ? `<span style="font-size:11px;font-weight:700;color:#D2542F">OVERDUE</span>` : ''}
-        </div>
-        ${!compact && task.description ? `<div class="desc">${esc(task.description)}</div>` : ''}
+  const od = !task.completed && task.dueDate < todayYMD();
+  const rec = describeRecurrence(task);
+  const isFlight = task.category === 'flight';
+  return `<div class="task-row ${task.completed?'completed':''} ${od?'overdue':''} anim-fade" style="border-left-color:${pri.color}">
+    <button class="check" data-action="toggle-task" data-id="${task.id}">${ICON(task.completed?'check-circle-2':'circle')}</button>
+    <div class="body">
+      <div class="title-line">
+        <span class="title">${esc(task.title)}</span>
+        ${task.dueTime ? `<span class="meta mono">${ICON(isFlight?'plane':'clock')} ${esc(fmtTime(task.dueTime))}</span>` : ''}
+        ${cat ? `<span class="chip" style="background:${cat.color}20;color:${cat.color}"><span class="dot" style="background:${cat.color}"></span>${esc(cat.name)}</span>` : ''}
+        ${task.reminder && !task.completed ? `<span style="color:var(--accent);display:inline-flex" title="Reminder set">${ICON('bell')}</span>` : ''}
+        ${task.alarm && !task.completed ? `<span style="color:var(--accent);display:inline-flex" title="Alarm sound on">${ICON('volume-2')}</span>` : ''}
+        ${rec ? `<span class="meta" style="color:var(--accent)">${ICON('repeat')} ${esc(rec)}</span>` : ''}
+        ${od ? `<span style="font-size:11px;font-weight:700;color:#D2542F">OVERDUE</span>` : ''}
       </div>
-      ${!compact ? `
-        <div class="actions">
-          <button data-action="edit-task" data-id="${task.id}">${ICON('edit-3')}</button>
-          <button data-action="delete-task" data-id="${task.id}">${ICON('trash-2')}</button>
-        </div>
-      ` : ''}
-    </div>`;
+      ${!compact && task.description ? `<div class="desc">${esc(task.description)}</div>` : ''}
+    </div>
+    ${!compact ? `<div class="actions"><button data-action="edit-task" data-id="${task.id}">${ICON('edit-3')}</button><button data-action="delete-task" data-id="${task.id}">${ICON('trash-2')}</button></div>` : ''}
+  </div>`;
 }
+
+function renderCollection() {
+  const items = state.data.collections.slice();
+  const sort = state.collectionSort;
+  items.sort((a,b) => {
+    if (sort === 'date-desc') return (b.date||'').localeCompare(a.date||'');
+    if (sort === 'date-asc')  return (a.date||'').localeCompare(b.date||'');
+    if (sort === 'price-desc') return (b.price||0) - (a.price||0);
+    if (sort === 'price-asc')  return (a.price||0) - (b.price||0);
+    if (sort === 'name')      return (a.name||'').localeCompare(b.name||'');
+    return 0;
+  });
+  const totals = {};
+  state.data.collections.forEach(c => { totals[c.currency] = (totals[c.currency] || 0) + (Number(c.price) || 0); });
+
+  return `<div style="max-width:900px">
+    ${items.length > 0 ? `<section class="grid-stats" style="margin-bottom:16px">
+      ${Object.entries(totals).map(([ccy,total],i) => statCard('coins', `Total ${ccy}`, fmtMoney(total, ccy), `${state.data.collections.filter(c => c.currency===ccy).length} items`, i*0.05)).join('')}
+      ${statCard('package', 'All items', state.data.collections.length, 'in collection', 0.15)}
+    </section>` : ''}
+
+    <div class="row-wrap" style="margin-bottom:16px">
+      <select class="pill" style="padding-right:28px" data-action="set-coll-sort">
+        <option value="date-desc"  ${sort==='date-desc'?'selected':''}>Newest first</option>
+        <option value="date-asc"   ${sort==='date-asc'?'selected':''}>Oldest first</option>
+        <option value="price-desc" ${sort==='price-desc'?'selected':''}>Price: high to low</option>
+        <option value="price-asc"  ${sort==='price-asc'?'selected':''}>Price: low to high</option>
+        <option value="name"       ${sort==='name'?'selected':''}>Name A–Z</option>
+      </select>
+      <div class="spacer"></div>
+      <button class="pill" data-action="export-collection">${ICON('download')} Export CSV</button>
+    </div>
+
+    ${items.length === 0 ? `<div class="empty">${ICON('package')}
+      <div class="title">Your collection is empty</div>
+      <div class="desc">Tap + to add an item. When you log purchases in your journal with a price (RM, USD, etc.), Daily will offer to add them here.</div>
+    </div>` : `<div class="stack-sm">${items.map(collectionCardHTML).join('')}</div>`}
+  </div>`;
+}
+
+function collectionCardHTML(c) {
+  const linkedEntry = c.journalEntryId ? state.data.entries.find(e => e.id === c.journalEntryId) : null;
+  return `<div class="coll-card anim-fade">
+    <div style="width:44px;height:44px;border-radius:10px;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0">${ICON('package')}</div>
+    <div class="info">
+      <div class="name">${esc(c.name)}</div>
+      <div class="meta">${esc(fmtDate(c.date,'medium'))}${c.notes?` · ${esc(c.notes)}`:''}${linkedEntry?` · ${ICON('link','style="font-size:11px"')} from journal`:''}</div>
+    </div>
+    <div class="price">${fmtMoney(c.price, c.currency)}</div>
+    <div class="actions">
+      <button data-action="edit-collection" data-id="${c.id}">${ICON('edit-3')}</button>
+      <button data-action="delete-collection" data-id="${c.id}">${ICON('trash-2')}</button>
+    </div>
+  </div>`;
+}
+
 function renderCalendar() {
   const cursor = state.calendarCursor;
   const monthStart = new Date(cursor); monthStart.setDate(1);
   const startDay = monthStart.getDay();
   const dim = daysInMonth(cursor);
-
   const cells = [];
-  for (let i = 0; i < startDay; i++) cells.push(null);
-  for (let d = 1; d <= dim; d++) cells.push(ymd(new Date(cursor.getFullYear(), cursor.getMonth(), d)));
-
+  for (let i=0; i<startDay; i++) cells.push(null);
+  for (let d=1; d<=dim; d++) cells.push(ymd(new Date(cursor.getFullYear(), cursor.getMonth(), d)));
   const itemsByDate = {};
   state.data.tasks.forEach(t => { (itemsByDate[t.dueDate] = itemsByDate[t.dueDate] || { tasks: [], entries: [] }).tasks.push(t); });
   state.data.entries.forEach(e => { (itemsByDate[e.date] = itemsByDate[e.date] || { tasks: [], entries: [] }).entries.push(e); });
+  const sel = itemsByDate[state.calendarSelected] || { tasks: [], entries: [] };
 
-  const selected = state.calendarSelected;
-  const sel = itemsByDate[selected] || { tasks: [], entries: [] };
-
-  return `
-    <div style="max-width:1000px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <button class="icon-btn" data-action="cal-prev">${ICON('chevron-left')}</button>
-        <h2 class="display" style="margin:0;font-size:22px;font-weight:600">${esc(cursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))}</h2>
-        <button class="icon-btn" data-action="cal-next">${ICON('chevron-right')}</button>
-      </div>
-      <div class="card" style="margin-bottom:16px">
-        <div class="cal-grid" style="margin-bottom:8px">
-          ${['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d => `<div class="day-label">${d}</div>`).join('')}
-        </div>
-        <div class="cal-grid">
-          ${cells.map(date => {
-            if (!date) return `<div></div>`;
-            const data = itemsByDate[date];
-            const isToday = date === todayYMD();
-            const isSelected = date === selected;
-            const dayNum = parseInt(date.split('-')[2], 10);
-            return `
-              <button class="cal-cell ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}" data-action="cal-select" data-date="${date}">
-                <span>${dayNum}</span>
-                ${data ? `<div class="dots">
-                  ${data.tasks.slice(0, 3).map(t => {
-                    const c = state.data.categories.find(c2 => c2.id === t.category);
-                    return `<span style="background:${c?.color || 'var(--accent)'};opacity:${t.completed ? 0.4 : 1}"></span>`;
-                  }).join('')}
-                  ${data.entries.length > 0 ? `<span style="background:var(--text-dim)"></span>` : ''}
-                </div>` : ''}
-              </button>`;
-          }).join('')}
-        </div>
-      </div>
-      <div class="card">
-        <header>
-          <div>
-            <h3>${esc(fmtDate(selected, 'long'))}</h3>
-            <div class="sub">${sel.tasks.length} tasks · ${sel.entries.length} journal entries</div>
-          </div>
-        </header>
-        ${sel.tasks.length === 0 && sel.entries.length === 0 ? `
-          <div class="empty"><div class="desc">Nothing recorded for this day.</div></div>
-        ` : `
-          <div class="col-stack">
-            ${sel.tasks.length > 0 ? `
-              <div>
-                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Tasks</div>
-                <div class="stack-sm">${sel.tasks.map(t => taskRowHTML(t, false)).join('')}</div>
-              </div>` : ''}
-            ${sel.entries.length > 0 ? `
-              <div>
-                <div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Journal</div>
-                <div class="stack-sm" style="gap:12px">${sel.entries.map(entryCardHTML).join('')}</div>
-              </div>` : ''}
-          </div>
-        `}
-      </div>
-    </div>`;
+  return `<div style="max-width:1000px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <button class="icon-btn" data-action="cal-prev">${ICON('chevron-left')}</button>
+      <h2 class="display" style="margin:0;font-size:22px;font-weight:600">${esc(cursor.toLocaleDateString(undefined,{month:'long',year:'numeric'}))}</h2>
+      <button class="icon-btn" data-action="cal-next">${ICON('chevron-right')}</button>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="cal-grid" style="margin-bottom:8px">${['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d => `<div class="day-label">${d}</div>`).join('')}</div>
+      <div class="cal-grid">${cells.map(date => {
+        if (!date) return `<div></div>`;
+        const data = itemsByDate[date];
+        const isToday = date === todayYMD();
+        const isSel = date === state.calendarSelected;
+        const dn = parseInt(date.split('-')[2], 10);
+        return `<button class="cal-cell ${isToday?'today':''} ${isSel?'selected':''}" data-action="cal-select" data-date="${date}">
+          <span>${dn}</span>
+          ${data ? `<div class="dots">${data.tasks.slice(0,3).map(t => {const c = state.data.categories.find(c2 => c2.id === t.category); return `<span style="background:${c?.color || 'var(--accent)'};opacity:${t.completed?0.4:1}"></span>`;}).join('')}${data.entries.length>0?`<span style="background:var(--text-dim)"></span>`:''}</div>` : ''}
+        </button>`;
+      }).join('')}</div>
+    </div>
+    <div class="card">
+      <header><div><h3>${esc(fmtDate(state.calendarSelected,'long'))}</h3><div class="sub">${sel.tasks.length} tasks · ${sel.entries.length} journal entries</div></div></header>
+      ${sel.tasks.length === 0 && sel.entries.length === 0 ? `<div class="empty"><div class="desc">Nothing recorded for this day.</div></div>`
+      : `<div class="col-stack">
+        ${sel.tasks.length > 0 ? `<div><div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Tasks</div><div class="stack-sm">${sel.tasks.map(t=>taskRowHTML(t,false)).join('')}</div></div>` : ''}
+        ${sel.entries.length > 0 ? `<div><div style="font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Journal</div><div class="stack-sm" style="gap:12px">${sel.entries.map(entryCardHTML).join('')}</div></div>` : ''}
+      </div>`}
+    </div>
+  </div>`;
 }
+
 function renderHistory() {
   const items = [
     ...state.data.entries.map(e => ({ kind: 'entry', date: e.date, time: e.time, data: e })),
     ...state.data.tasks.map(t => ({ kind: 'task', date: t.dueDate, time: t.dueTime, data: t })),
-  ].sort((a, b) => b.date.localeCompare(a.date) || (b.time || '').localeCompare(a.time || ''));
-
+    ...state.data.collections.map(c => ({ kind: 'coll', date: c.date, time: '', data: c })),
+  ].sort((a,b) => b.date.localeCompare(a.date) || (b.time||'').localeCompare(a.time||''));
   const q = state.search.toLowerCase();
-  const filtered = q ? items.filter(i => (i.data.title || '').toLowerCase().includes(q) || (i.data.description || '').toLowerCase().includes(q)) : items;
+  const filtered = q ? items.filter(i => (i.data.title||i.data.name||'').toLowerCase().includes(q) || (i.data.description||i.data.notes||'').toLowerCase().includes(q)) : items;
 
-  return `
-    <div style="max-width:800px">
-      <div style="position:relative;margin-bottom:16px">
-        ${ICON('search', 'style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none"')}
-        <input type="text" class="input" placeholder="Search journal and tasks…" value="${esc(state.search)}" data-action="set-search" style="padding-left:40px" />
-      </div>
-      <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">${filtered.length} ${filtered.length === 1 ? 'result' : 'results'}</div>
-      ${filtered.length === 0 ? `<div class="empty"><div class="desc">${state.search ? `No matches for "${esc(state.search)}"` : 'Nothing yet — start logging or adding tasks.'}</div></div>
-      ` : `
-        <div class="stack-sm" style="gap:10px">
-          ${filtered.map(i => `
-            <div class="task-row" style="border-left-color:var(--border)">
-              <div class="mono" style="min-width:70px;font-size:11px;color:var(--text-dim);font-weight:600;padding-top:2px">
-                <div>${esc(fmtDate(i.date, 'short'))}</div>
-                ${i.time ? `<div style="color:var(--text-faint);margin-top:2px">${esc(fmtTime(i.time))}</div>` : ''}
-              </div>
-              <div class="body">
-                <div class="title-line">
-                  <span class="chip" style="background:${i.kind === 'task' ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--border)'};color:${i.kind === 'task' ? 'var(--accent)' : 'var(--text-dim)'}">${i.kind === 'task' ? 'Task' : 'Journal'}</span>
-                  ${i.kind === 'task' && i.data.completed ? `<span style="color:var(--accent)">${ICON('check')}</span>` : ''}
-                </div>
-                <div style="font-size:15px;font-weight:500;${i.kind === 'task' && i.data.completed ? 'text-decoration:line-through;opacity:0.6' : ''}">${esc(i.data.title)}</div>
-                ${i.data.description ? `<div class="desc">${esc(i.data.description)}</div>` : ''}
-              </div>
-            </div>
-          `).join('')}
+  return `<div style="max-width:800px">
+    <div style="position:relative;margin-bottom:16px">
+      ${ICON('search','style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none"')}
+      <input type="text" class="input" placeholder="Search everything…" value="${esc(state.search)}" data-action="set-search" style="padding-left:40px" />
+    </div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">${filtered.length} ${filtered.length===1?'result':'results'}</div>
+    ${filtered.length === 0 ? `<div class="empty"><div class="desc">${state.search ? `No matches for "${esc(state.search)}"` : 'Nothing yet.'}</div></div>`
+    : `<div class="stack-sm" style="gap:10px">${filtered.map(i => {
+      const isTask = i.kind === 'task', isColl = i.kind === 'coll';
+      const title = i.data.title || i.data.name;
+      const chipLabel = isTask ? 'Task' : isColl ? 'Collection' : 'Journal';
+      const chipColor = isTask ? 'var(--accent)' : isColl ? '#7B3F5C' : 'var(--text-dim)';
+      return `<div class="task-row" style="border-left-color:var(--border)">
+        <div class="mono" style="min-width:70px;font-size:11px;color:var(--text-dim);font-weight:600;padding-top:2px">
+          <div>${esc(fmtDate(i.date,'short'))}</div>
+          ${i.time ? `<div style="color:var(--text-faint);margin-top:2px">${esc(fmtTime(i.time))}</div>` : ''}
         </div>
-      `}
-    </div>`;
+        <div class="body">
+          <div class="title-line">
+            <span class="chip" style="background:color-mix(in srgb,${chipColor} 20%,transparent);color:${chipColor}">${chipLabel}</span>
+            ${isTask && i.data.completed ? `<span style="color:var(--accent)">${ICON('check')}</span>` : ''}
+            ${isColl ? `<span class="mono" style="font-size:12px;color:var(--accent);font-weight:600">${fmtMoney(i.data.price, i.data.currency)}</span>` : ''}
+          </div>
+          <div style="font-size:15px;font-weight:500;${isTask && i.data.completed?'text-decoration:line-through;opacity:0.6':''}">${esc(title)}</div>
+          ${i.data.description || i.data.notes ? `<div class="desc">${esc(i.data.description || i.data.notes)}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('')}</div>`}
+  </div>`;
 }
+
 function renderSettings() {
   const s = state.data.settings;
   const installed = isStandaloneInstalled();
-  const notifPerm = ('Notification' in window) ? Notification.permission : 'unsupported';
-  return `
-    <div style="max-width:700px" class="col-stack">
-      <div class="card">
-        <header><h3>Appearance</h3></header>
-        <div class="field">
-          <label>Theme</label>
-          <div style="display:inline-flex;background:var(--surface-2);padding:4px;border-radius:10px;border:1px solid var(--border);gap:0">
-            <button class="btn ${s.theme === 'light' ? 'btn-primary' : ''}" style="${s.theme === 'light' ? '' : 'background:transparent;color:var(--text)'};padding:7px 14px" data-action="set-theme" data-theme="light">${ICON('sun')} Light</button>
-            <button class="btn ${s.theme === 'dark' ? 'btn-primary' : ''}" style="${s.theme === 'dark' ? '' : 'background:transparent;color:var(--text)'};padding:7px 14px" data-action="set-theme" data-theme="dark">${ICON('moon')} Dark</button>
-          </div>
-        </div>
-        <div class="field">
-          <label>Accent color</label>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            ${Object.entries(ACCENT_COLORS).map(([id, c]) => `<button class="swatch ${s.accent === id ? 'active' : ''}" style="background:${c.hex};color:${c.hex}" title="${c.name}" data-action="set-accent" data-accent="${id}"></button>`).join('')}
-          </div>
+  const np = ('Notification' in window) ? Notification.permission : 'unsupported';
+  return `<div style="max-width:700px" class="col-stack">
+    <div class="card">
+      <header><h3>Appearance</h3></header>
+      <div class="field"><label>Theme</label>
+        <div style="display:inline-flex;background:var(--surface-2);padding:4px;border-radius:10px;border:1px solid var(--border)">
+          <button class="btn ${s.theme==='light'?'btn-primary':''}" style="${s.theme==='light'?'':'background:transparent;color:var(--text)'};padding:7px 14px" data-action="set-theme" data-theme="light">${ICON('sun')} Light</button>
+          <button class="btn ${s.theme==='dark'?'btn-primary':''}" style="${s.theme==='dark'?'':'background:transparent;color:var(--text)'};padding:7px 14px" data-action="set-theme" data-theme="dark">${ICON('moon')} Dark</button>
         </div>
       </div>
-
-      <div class="card">
-        <header><h3>Profile</h3></header>
-        <div class="field">
-          <label>Your name</label>
-          <input type="text" class="input" placeholder="Optional" value="${esc(s.displayName || '')}" data-action="set-name" />
-          <div class="hint">Used in the greeting on the dashboard.</div>
-        </div>
+      <div class="field"><label>Accent color</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">${Object.entries(ACCENT_COLORS).map(([id,c]) => `<button class="swatch ${s.accent===id?'active':''}" style="background:${c.hex};color:${c.hex}" title="${c.name}" data-action="set-accent" data-accent="${id}"></button>`).join('')}</div>
       </div>
+    </div>
 
-      <div class="card">
-        <header><h3>Install as app</h3></header>
-        <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;line-height:1.6">
-          ${installed
-            ? `<strong style="color:var(--accent)">✓ App is installed.</strong> You're using Daily in standalone mode.`
-            : `Install Daily to your home screen for a faster, full-screen experience.`}
-        </div>
-        ${!installed ? `
-          <button class="btn btn-primary" data-action="trigger-install">${ICON('download')} Install app</button>
-          <details style="margin-top:14px">
-            <summary style="cursor:pointer;font-weight:600;font-size:13px">Manual install instructions</summary>
-            <div style="font-size:13px;color:var(--text-dim);line-height:1.7;padding:8px 0">
-              <strong>iPhone / iPad (Safari):</strong>
-              <ol style="padding-left:20px;margin:6px 0">
-                <li>Tap the Share button (square with up-arrow) at the bottom</li>
-                <li>Scroll down and tap "Add to Home Screen"</li>
-                <li>Tap Add</li>
-              </ol>
-              <strong>Android (Chrome):</strong>
-              <ol style="padding-left:20px;margin:6px 0">
-                <li>Tap the three-dot menu in the top right</li>
-                <li>Tap "Install app" or "Add to Home screen"</li>
-              </ol>
-              <strong>Desktop (Chrome/Edge):</strong>
-              <ol style="padding-left:20px;margin:6px 0">
-                <li>Look for the install icon in the address bar</li>
-                <li>Click it and confirm</li>
-              </ol>
-            </div>
-          </details>
-        ` : ''}
+    <div class="card"><header><h3>Profile</h3></header>
+      <div class="field"><label>Your name</label>
+        <input type="text" class="input" placeholder="Optional" value="${esc(s.displayName||'')}" data-action="set-name" />
+        <div class="hint">Used in the greeting on the dashboard.</div>
       </div>
+    </div>
 
-      <div class="card">
-        <header><h3>Reminders</h3></header>
-        <div style="font-size:13px;color:var(--text-dim);margin-bottom:12px;line-height:1.6">
-          Tasks with reminders will trigger notifications at <strong>1 hour</strong>, <strong>30 minutes</strong>, <strong>10 minutes</strong> before due, and <strong>at the due time</strong>.
-        </div>
-        <div style="background:color-mix(in srgb, var(--accent) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent) 25%, var(--border));border-radius:8px;padding:12px;font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">
-          <strong>${ICON('info')} Mobile limitations:</strong> Notifications only fire while the app is open or running in the background. When the tab/app is fully closed, the OS suspends timers — so reminders may be delayed until you reopen Daily. For best results on mobile: install as PWA (above) and keep the app open or recently used.
-        </div>
-        <button class="btn ${s.notificationsEnabled && notifPerm === 'granted' ? 'btn-ghost' : 'btn-primary'}" ${s.notificationsEnabled && notifPerm === 'granted' ? 'disabled' : ''} data-action="request-notifications">
-          ${s.notificationsEnabled && notifPerm === 'granted'
-            ? `${ICON('check')} Reminders enabled`
-            : `${ICON('bell')} Enable notifications`}
-        </button>
-        ${notifPerm === 'denied' ? `<div style="font-size:12px;color:#D2542F;margin-top:10px">Notifications are blocked by the browser. Enable them in your browser/site settings.</div>` : ''}
+    <div class="card"><header><h3>Install as app</h3></header>
+      <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;line-height:1.6">${installed
+        ? `<strong style="color:var(--accent)">✓ App is installed.</strong>`
+        : `Install Daily to your home screen for a faster, full-screen experience.`}</div>
+      ${!installed ? `<button class="btn btn-primary" data-action="trigger-install">${ICON('download')} Install app</button>` : ''}
+    </div>
+
+    <div class="card"><header><h3>Reminders</h3></header>
+      <div style="font-size:13px;color:var(--text-dim);margin-bottom:12px;line-height:1.6">
+        Regular tasks: <strong>1h / 30m / 10m / due time</strong>.<br>
+        Flight category: <strong>3h / 1h / due time</strong>.
       </div>
-
-      <div class="card">
-        <header><h3>Categories</h3></header>
-        <div class="stack-sm" style="margin-bottom:14px">
-          ${state.data.categories.map(c => `
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface-2);border-radius:8px;border:1px solid var(--border)">
-              <span style="width:14px;height:14px;border-radius:999px;background:${c.color}"></span>
-              <input type="text" value="${esc(c.name)}" data-action="cat-rename" data-id="${c.id}" style="flex:1;background:transparent;border:none;color:var(--text);outline:none;font-size:14px" />
-              <input type="color" value="${c.color}" data-action="cat-recolor" data-id="${c.id}" style="width:28px;height:28px;padding:0;border:none;background:transparent;cursor:pointer" />
-              <button data-action="cat-delete" data-id="${c.id}" style="color:var(--text-dim);padding:6px">${ICON('trash-2')}</button>
-            </div>
-          `).join('')}
-        </div>
-        <div style="display:flex;gap:8px">
-          <input id="new-cat-name" type="text" class="input" placeholder="New category name…" />
-          <input id="new-cat-color" type="color" value="#1E3A5F" style="width:40px;height:40px;padding:0;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:transparent" />
-          <button class="btn btn-primary" data-action="cat-add">Add</button>
-        </div>
+      <div style="background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,var(--border));border-radius:8px;padding:12px;font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">
+        <strong>${ICON('info')} For reliable alarms when the app is closed:</strong> Use the <strong>"Export .ics"</strong> button on the Tasks page. Import the file into your phone's calendar — it includes proper alarm triggers that your OS will fire even with Daily closed.
       </div>
-
-      <div class="card">
-        <header><h3>Account</h3></header>
-        <div style="font-size:13px;margin-bottom:14px">Signed in as: <strong>${esc(state.user?.email || state.user?.displayName || 'User')}</strong></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-ghost" data-action="signout">${ICON('log-out')} Sign out</button>
-          <button class="btn btn-ghost" data-action="export-json">${ICON('download')} Download backup</button>
-          <button class="btn btn-ghost" data-action="import-json">${ICON('upload')} Import backup</button>
-        </div>
+      <button class="btn ${s.notificationsEnabled && np==='granted'?'btn-ghost':'btn-primary'}" ${s.notificationsEnabled && np==='granted'?'disabled':''} data-action="request-notifications">
+        ${s.notificationsEnabled && np==='granted' ? `${ICON('check')} In-app notifications enabled` : `${ICON('bell')} Enable in-app notifications`}
+      </button>
+      ${np === 'denied' ? `<div style="font-size:12px;color:var(--danger);margin-top:10px">Notifications are blocked. Enable in browser settings.</div>` : ''}
+      <div class="field" style="margin-top:14px;margin-bottom:0">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:normal;font-size:13px">
+          <input type="checkbox" ${s.audioAlarm?'checked':''} data-action="toggle-audio-alarm" />
+          Play alarm sound when reminders fire (and task has alarm on)
+        </label>
       </div>
+    </div>
 
-      <div style="font-size:12px;color:var(--text-faint);text-align:center;padding:20px">Daily Planner</div>
-    </div>`;
+    <div class="card"><header><h3>Categories</h3></header>
+      <div class="stack-sm" style="margin-bottom:14px">${state.data.categories.map(c => `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface-2);border-radius:8px;border:1px solid var(--border)">
+        <span style="width:14px;height:14px;border-radius:999px;background:${c.color}"></span>
+        <input type="text" value="${esc(c.name)}" data-action="cat-rename" data-id="${c.id}" style="flex:1;background:transparent;border:none;outline:none;font-size:14px" />
+        <input type="color" value="${c.color}" data-action="cat-recolor" data-id="${c.id}" style="width:28px;height:28px;padding:0;border:none;background:transparent;cursor:pointer" />
+        <button data-action="cat-delete" data-id="${c.id}" style="color:var(--text-dim);padding:6px">${ICON('trash-2')}</button>
+      </div>`).join('')}</div>
+      <div style="display:flex;gap:8px">
+        <input id="new-cat-name" type="text" class="input" placeholder="New category name…" />
+        <input id="new-cat-color" type="color" value="#1E3A5F" style="width:40px;height:40px;padding:0;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:transparent" />
+        <button class="btn btn-primary" data-action="cat-add">Add</button>
+      </div>
+    </div>
+
+    <div class="card"><header><h3>Account</h3></header>
+      <div style="font-size:13px;margin-bottom:14px">Signed in as: <strong>${esc(state.user?.email || state.user?.displayName || 'User')}</strong></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" data-action="signout">${ICON('log-out')} Sign out</button>
+        <button class="btn btn-ghost" data-action="export-json">${ICON('download')} Download backup</button>
+        <button class="btn btn-ghost" data-action="import-json">${ICON('upload')} Import backup</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text-faint);text-align:center;padding:20px">Daily Planner</div>
+  </div>`;
 }
+
 function renderModal() {
   const root = document.getElementById('modal-root');
   if (!state.modal) { root.innerHTML = ''; return; }
 
-  if (state.modal.type === 'install') {
-    root.innerHTML = `
-      <div class="modal-overlay" data-action="close-modal">
-        <div class="modal" style="max-width:420px">
-          <header>
-            <h2>Install Daily</h2>
-            <button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button>
-          </header>
-          <div class="body">
-            ${isIOS() ? `
-              <div style="font-size:14px;line-height:1.7">
-                <strong>To install on iPhone/iPad:</strong>
-                <ol style="padding-left:20px;margin-top:10px">
-                  <li>Tap the Share button ${ICON('share')} at the bottom of Safari</li>
-                  <li>Scroll down and tap "Add to Home Screen"</li>
-                  <li>Tap Add in the top right</li>
-                </ol>
-                <div style="margin-top:14px;font-size:13px;color:var(--text-dim)">Note: only works in Safari, not Chrome on iOS.</div>
-              </div>
-            ` : isAndroid() ? `
-              <div style="font-size:14px;line-height:1.7">
-                <strong>To install on Android:</strong>
-                <ol style="padding-left:20px;margin-top:10px">
-                  <li>Tap the three-dot menu ${ICON('more-vertical')} in the top right</li>
-                  <li>Tap "Install app" or "Add to Home screen"</li>
-                  <li>Confirm</li>
-                </ol>
-              </div>
-            ` : `
-              <div style="font-size:14px;line-height:1.7">
-                <strong>To install on desktop:</strong>
-                <ol style="padding-left:20px;margin-top:10px">
-                  <li>Look for the install icon ${ICON('download')} in your browser's address bar</li>
-                  <li>Click it and confirm</li>
-                </ol>
-              </div>
-            `}
-            <div class="footer-row"><button class="btn btn-primary" data-action="close-modal">Got it</button></div>
+  if (state.modal.type === 'confirm') {
+    const m = state.modal;
+    root.innerHTML = `<div class="modal-overlay" data-action="confirm-cancel">
+      <div class="modal" style="max-width:400px">
+        <div class="body" style="padding:28px 24px;text-align:center">
+          <div class="confirm-icon ${m.danger?'danger':m.kind||'warn'}">${ICON(m.danger?'alert-triangle':m.kind==='info'?'info':'help-circle')}</div>
+          <h2 style="margin:0 0 8px;font-family:'Fraunces',serif;font-size:20px;font-weight:600">${esc(m.title)}</h2>
+          ${m.message ? `<div style="color:var(--text-dim);font-size:14px;line-height:1.55">${esc(m.message)}</div>` : ''}
+          <div style="display:flex;gap:10px;margin-top:24px;${m.single?'justify-content:center':''}">
+            ${m.single ? `<button class="btn btn-primary" data-action="confirm-ok" style="min-width:120px">${esc(m.confirmText)}</button>`
+             : `<button class="btn btn-ghost" data-action="confirm-cancel" style="flex:1">${esc(m.cancelText)}</button>
+                <button class="btn ${m.danger?'btn-danger':'btn-primary'}" data-action="confirm-ok" style="flex:1">${esc(m.confirmText)}</button>`}
           </div>
         </div>
-      </div>`;
-    refreshIcons(); return;
+      </div>
+    </div>`;
+    refreshIcons();
+    return;
+  }
+
+  if (state.modal.type === 'install') {
+    root.innerHTML = `<div class="modal-overlay" data-action="close-modal">
+      <div class="modal" style="max-width:420px">
+        <header><h2>Install Daily</h2><button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button></header>
+        <div class="body">
+          ${isIOS() ? `<div style="font-size:14px;line-height:1.7"><strong>On iPhone/iPad:</strong>
+            <ol style="padding-left:20px;margin-top:10px">
+              <li>Tap the Share button ${ICON('share')} at the bottom of Safari</li>
+              <li>Scroll down and tap "Add to Home Screen"</li>
+              <li>Tap Add</li>
+            </ol>
+            <div style="margin-top:14px;font-size:13px;color:var(--text-dim)">Note: only works in Safari, not Chrome on iOS.</div>
+          </div>` : isAndroid() ? `<div style="font-size:14px;line-height:1.7"><strong>On Android:</strong>
+            <ol style="padding-left:20px;margin-top:10px">
+              <li>Tap the three-dot menu ${ICON('more-vertical')}</li>
+              <li>Tap "Install app" or "Add to Home screen"</li>
+            </ol>
+          </div>` : `<div style="font-size:14px;line-height:1.7"><strong>On desktop:</strong>
+            <ol style="padding-left:20px;margin-top:10px">
+              <li>Look for the install icon ${ICON('download')} in your browser's address bar</li>
+              <li>Click it and confirm</li>
+            </ol>
+          </div>`}
+          <div class="footer-row"><button class="btn btn-primary" data-action="close-modal">Got it</button></div>
+        </div>
+      </div>
+    </div>`;
+    refreshIcons();
+    return;
   }
 
   if (state.modal.type === 'entry') {
     const editing = state.modal.edit;
-    const data = editing || {
-      id: uid(), date: todayYMD(),
-      time: new Date().toTimeString().slice(0, 5),
-      title: '', description: '',
-      category: state.data.categories[0]?.id || 'work',
-      mood: 'good',
-    };
-    root.innerHTML = `
-      <div class="modal-overlay" data-action="close-modal">
-        <div class="modal">
-          <header>
-            <h2>${editing ? 'Edit entry' : 'Log a moment'}</h2>
-            <button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button>
-          </header>
-          <div class="body">
-            <form id="entry-form">
-              <input type="hidden" name="id" value="${esc(data.id)}" />
-              <div class="field"><label>Title</label><input class="input" name="title" autofocus value="${esc(data.title)}" placeholder="What happened?" required /></div>
-              <div class="field"><label>Details (optional)</label><textarea class="textarea" name="description" placeholder="A bit more about it…">${esc(data.description || '')}</textarea></div>
-              <div class="form-row">
-                <div class="field"><label>Date</label><input class="input" type="date" name="date" value="${esc(data.date)}" /></div>
-                <div class="field"><label>Time</label><input class="input" type="time" name="time" value="${esc(data.time || '')}" /></div>
-              </div>
-              <div class="field"><label>Category</label>
-                <select class="input" name="category">${state.data.categories.map(c => `<option value="${esc(c.id)}" ${data.category === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
-              </div>
-              <div class="field"><label>How did it feel?</label>
-                <div style="display:flex;gap:8px">
-                  ${MOODS.map(m => `
-                    <label style="flex:1;cursor:pointer">
-                      <input type="radio" name="mood" value="${m.id}" ${data.mood === m.id ? 'checked' : ''} style="display:none" />
-                      <div class="mood-opt" data-mood="${m.id}" style="padding:10px 8px;border-radius:8px;text-align:center;background:${data.mood === m.id ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--surface-2)'};border:1px solid ${data.mood === m.id ? 'var(--accent)' : 'var(--border)'};color:${data.mood === m.id ? 'var(--accent)' : 'var(--text)'};font-size:12px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:4px">${ICON(m.icon)} ${m.label}</div>
-                    </label>
-                  `).join('')}
-                </div>
-              </div>
-              <div class="footer-row">
-                <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">${editing ? 'Save' : 'Add entry'}</button>
-              </div>
-            </form>
+    const d = editing || { id: uid(), date: todayYMD(), time: new Date().toTimeString().slice(0,5), title: '', description: '', category: state.data.categories[0]?.id || 'work', mood: 'good' };
+    root.innerHTML = `<div class="modal-overlay" data-action="close-modal">
+      <div class="modal">
+        <header><h2>${editing?'Edit entry':'Log a moment'}</h2><button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button></header>
+        <div class="body"><form id="entry-form">
+          <input type="hidden" name="id" value="${esc(d.id)}" />
+          <div class="field"><label>Title</label><input class="input" name="title" autofocus value="${esc(d.title)}" placeholder="What happened?" required /></div>
+          <div class="field"><label>Details (optional)</label><textarea class="textarea" name="description" placeholder="A bit more about it…">${esc(d.description||'')}</textarea></div>
+          <div class="form-row">
+            <div class="field"><label>Date</label><input class="input" type="date" name="date" value="${esc(d.date)}" /></div>
+            <div class="field"><label>Time</label><input class="input" type="time" name="time" value="${esc(d.time||'')}" /></div>
           </div>
-        </div>
-      </div>`;
-    refreshIcons(); setupEntryForm();
+          <div class="field"><label>Category</label>
+            <select class="input" name="category">${state.data.categories.map(c => `<option value="${esc(c.id)}" ${d.category===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>How did it feel?</label>
+            <div style="display:flex;gap:8px">${MOODS.map(m => `<label style="flex:1;cursor:pointer">
+              <input type="radio" name="mood" value="${m.id}" ${d.mood===m.id?'checked':''} style="display:none" />
+              <div class="mood-opt" data-mood="${m.id}" style="padding:10px 8px;border-radius:8px;text-align:center;background:${d.mood===m.id?'color-mix(in srgb,var(--accent) 20%,transparent)':'var(--surface-2)'};border:1px solid ${d.mood===m.id?'var(--accent)':'var(--border)'};color:${d.mood===m.id?'var(--accent)':'var(--text)'};font-size:12px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:4px">${ICON(m.icon)} ${m.label}</div>
+            </label>`).join('')}</div>
+          </div>
+          <div class="footer-row">
+            <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">${editing?'Save':'Add entry'}</button>
+          </div>
+        </form></div>
+      </div>
+    </div>`;
+    refreshIcons(); setupEntryForm(!!editing);
   }
 
   if (state.modal.type === 'task') {
     const editing = state.modal.edit;
-    const data = editing || {
-      id: uid(),
-      dueDate: tomorrowYMD(), dueTime: '',
-      title: '', description: '',
-      category: state.data.categories[0]?.id || 'work',
-      priority: 'medium',
-      completed: false, reminder: false,
-      recurrence: 'none',
-      recurrenceDays: [],
-      recurrenceDay: 1,
-    };
-    const rec = data.recurrence || 'none';
-    const recDays = data.recurrenceDays || [];
-
-    root.innerHTML = `
-      <div class="modal-overlay" data-action="close-modal">
-        <div class="modal">
-          <header>
-            <h2>${editing ? 'Edit task' : 'New task'}</h2>
-            <button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button>
-          </header>
-          <div class="body">
-            <form id="task-form">
-              <input type="hidden" name="id" value="${esc(data.id)}" />
-              <input type="hidden" name="completed" value="${data.completed ? '1' : ''}" />
-              <div class="field"><label>Task</label><input class="input" name="title" autofocus value="${esc(data.title)}" placeholder="What needs doing?" required /></div>
-              <div class="field"><label>Notes (optional)</label><textarea class="textarea" name="description" placeholder="Any context or sub-steps…">${esc(data.description || '')}</textarea></div>
-              <div class="form-row">
-                <div class="field"><label>Due date</label><input class="input" type="date" name="dueDate" value="${esc(data.dueDate)}" /></div>
-                <div class="field"><label>Due time (optional)</label><input class="input" type="time" name="dueTime" value="${esc(data.dueTime || '')}" /></div>
-              </div>
-              <div class="form-row">
-                <div class="field"><label>Category</label>
-                  <select class="input" name="category">${state.data.categories.map(c => `<option value="${esc(c.id)}" ${data.category === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
-                </div>
-                <div class="field"><label>Priority</label>
-                  <select class="input" name="priority">${Object.entries(PRIORITIES).map(([id, p]) => `<option value="${id}" ${data.priority === id ? 'selected' : ''}>${esc(p.label)}</option>`).join('')}</select>
-                </div>
-              </div>
-
-              <!-- ===== Recurrence ===== -->
-              <div class="field">
-                <label>Repeat</label>
-                <select class="input" name="recurrence" id="recurrence-select">
-                  <option value="none" ${rec === 'none' ? 'selected' : ''}>Don't repeat</option>
-                  <option value="daily" ${rec === 'daily' ? 'selected' : ''}>Every day</option>
-                  <option value="weekly" ${rec === 'weekly' ? 'selected' : ''}>Weekly on specific days</option>
-                  <option value="monthly" ${rec === 'monthly' ? 'selected' : ''}>Monthly on day X</option>
-                </select>
-              </div>
-
-              <div class="field" id="recurrence-weekly" style="display:${rec === 'weekly' ? 'block' : 'none'}">
-                <label>Repeat on</label>
-                <div class="day-pills">
-                  ${DAY_NAMES_SHORT.map((d, i) => `
-                    <button type="button" class="day-pill ${recDays.includes(i) ? 'active' : ''}" data-day="${i}">${d}</button>
-                  `).join('')}
-                </div>
-                <input type="hidden" name="recurrenceDays" value="${recDays.join(',')}" />
-              </div>
-
-              <div class="field" id="recurrence-monthly" style="display:${rec === 'monthly' ? 'block' : 'none'}">
-                <label>Day of month (1–31)</label>
-                <input class="input" type="number" min="1" max="31" name="recurrenceDay" value="${data.recurrenceDay || 1}" />
-                <div class="hint">If a month has fewer days, the last day of the month is used.</div>
-              </div>
-
-              <!-- ===== Reminder ===== -->
-              <div class="field">
-                <label>Reminder</label>
-                <button type="button" id="task-reminder-btn" style="
-                  display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;
-                  background:${data.reminder ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--surface-2)'};
-                  color:${data.reminder ? 'var(--accent)' : 'var(--text)'};
-                  border:1px solid ${data.reminder ? 'var(--accent)' : 'var(--border)'};
-                ">${ICON(data.reminder ? 'bell' : 'bell-off')} Reminder ${data.reminder ? 'on' : 'off'}</button>
-                <input type="hidden" name="reminder" value="${data.reminder ? '1' : ''}" />
-                <div class="hint">With a due time set, you'll be notified at 1h, 30m, 10m before, and at the due time.</div>
-              </div>
-
-              <div class="footer-row">
-                <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">${editing ? 'Save' : 'Add task'}</button>
-              </div>
-            </form>
+    const d = editing || { id: uid(), dueDate: tomorrowYMD(), dueTime: '', title: '', description: '', category: state.data.categories[0]?.id || 'work', priority: 'medium', completed: false, reminder: false, alarm: false, recurrence: 'none', recurrenceDays: [], recurrenceDay: 1 };
+    const rec = d.recurrence || 'none';
+    const recDays = d.recurrenceDays || [];
+    root.innerHTML = `<div class="modal-overlay" data-action="close-modal">
+      <div class="modal">
+        <header><h2>${editing?'Edit task':'New task'}</h2><button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button></header>
+        <div class="body"><form id="task-form">
+          <input type="hidden" name="id" value="${esc(d.id)}" />
+          <input type="hidden" name="completed" value="${d.completed?'1':''}" />
+          <div class="field"><label>Task</label><input class="input" name="title" autofocus value="${esc(d.title)}" placeholder="What needs doing?" required /></div>
+          <div class="field"><label>Notes (optional)</label><textarea class="textarea" name="description" placeholder="Any context…">${esc(d.description||'')}</textarea></div>
+          <div class="form-row">
+            <div class="field"><label>Due date</label><input class="input" type="date" name="dueDate" value="${esc(d.dueDate)}" /></div>
+            <div class="field"><label>Due time</label><input class="input" type="time" name="dueTime" value="${esc(d.dueTime||'')}" /></div>
           </div>
-        </div>
-      </div>`;
+          <div class="form-row">
+            <div class="field"><label>Category</label>
+              <select class="input" name="category">${state.data.categories.map(c => `<option value="${esc(c.id)}" ${d.category===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
+              <div class="hint">Flight category uses 3h/1h reminders instead of 1h/30m/10m.</div>
+            </div>
+            <div class="field"><label>Priority</label>
+              <select class="input" name="priority">${Object.entries(PRIORITIES).map(([id,p]) => `<option value="${id}" ${d.priority===id?'selected':''}>${esc(p.label)}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div class="field"><label>Repeat</label>
+            <select class="input" name="recurrence" id="recurrence-select">
+              <option value="none" ${rec==='none'?'selected':''}>Don't repeat</option>
+              <option value="daily" ${rec==='daily'?'selected':''}>Every day</option>
+              <option value="weekly" ${rec==='weekly'?'selected':''}>Weekly on specific days</option>
+              <option value="monthly" ${rec==='monthly'?'selected':''}>Monthly on day X</option>
+            </select>
+          </div>
+          <div class="field" id="recurrence-weekly" style="display:${rec==='weekly'?'block':'none'}">
+            <label>Repeat on</label>
+            <div class="day-pills">${DAY_NAMES_SHORT.map((dn,i) => `<button type="button" class="day-pill ${recDays.includes(i)?'active':''}" data-day="${i}">${dn}</button>`).join('')}</div>
+            <input type="hidden" name="recurrenceDays" value="${recDays.join(',')}" />
+          </div>
+          <div class="field" id="recurrence-monthly" style="display:${rec==='monthly'?'block':'none'}">
+            <label>Day of month</label>
+            <input class="input" type="number" min="1" max="31" name="recurrenceDay" value="${d.recurrenceDay||1}" />
+          </div>
+          <div class="field"><label>Notifications</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" id="reminder-btn" data-on="${d.reminder?'1':''}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;background:${d.reminder?'color-mix(in srgb,var(--accent) 20%,transparent)':'var(--surface-2)'};color:${d.reminder?'var(--accent)':'var(--text)'};border:1px solid ${d.reminder?'var(--accent)':'var(--border)'}">${ICON(d.reminder?'bell':'bell-off')} Reminder ${d.reminder?'on':'off'}</button>
+              <button type="button" id="alarm-btn" data-on="${d.alarm?'1':''}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;background:${d.alarm?'color-mix(in srgb,var(--accent) 20%,transparent)':'var(--surface-2)'};color:${d.alarm?'var(--accent)':'var(--text)'};border:1px solid ${d.alarm?'var(--accent)':'var(--border)'}">${ICON(d.alarm?'volume-2':'volume-x')} Alarm ${d.alarm?'on':'off'}</button>
+            </div>
+            <input type="hidden" name="reminder" value="${d.reminder?'1':''}" />
+            <input type="hidden" name="alarm" value="${d.alarm?'1':''}" />
+            <div class="hint">Alarm plays a 30s beep when the reminder fires (in-app only).</div>
+          </div>
+          <div class="footer-row">
+            <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">${editing?'Save':'Add task'}</button>
+          </div>
+        </form></div>
+      </div>
+    </div>`;
     refreshIcons(); setupTaskForm();
+  }
+
+  if (state.modal.type === 'collection') {
+    const editing = state.modal.edit && state.data.collections.some(c => c.id === state.modal.edit.id);
+    const d = state.modal.edit || { id: uid(), name: '', price: 0, currency: 'RM', date: todayYMD(), notes: '', journalEntryId: null };
+    root.innerHTML = `<div class="modal-overlay" data-action="close-modal">
+      <div class="modal">
+        <header><h2>${editing?'Edit item':'Add to collection'}</h2><button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button></header>
+        <div class="body"><form id="coll-form">
+          <input type="hidden" name="id" value="${esc(d.id)}" />
+          <input type="hidden" name="journalEntryId" value="${esc(d.journalEntryId||'')}" />
+          <div class="field"><label>Item name</label><input class="input" name="name" autofocus value="${esc(d.name)}" placeholder="e.g. Hiroshima & Tohoku Pokemon Center Box" required /></div>
+          <div class="form-row">
+            <div class="field"><label>Price</label><input class="input" type="number" step="0.01" min="0" name="price" value="${d.price||0}" required /></div>
+            <div class="field"><label>Currency</label>
+              <select class="input" name="currency">${CURRENCIES.map(c => `<option value="${c}" ${d.currency===c?'selected':''}>${c}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div class="field"><label>Date purchased</label><input class="input" type="date" name="date" value="${esc(d.date)}" /></div>
+          <div class="field"><label>Notes (optional)</label><textarea class="textarea" name="notes" placeholder="Seller, condition, anything else…">${esc(d.notes||'')}</textarea></div>
+          ${d.journalEntryId ? `<div style="font-size:12px;color:var(--text-dim);margin-bottom:14px">${ICON('link')} Linked to a journal entry</div>` : ''}
+          <div class="footer-row">
+            <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">${editing?'Save':'Add item'}</button>
+          </div>
+        </form></div>
+      </div>
+    </div>`;
+    refreshIcons(); setupCollectionForm();
   }
 }
 
-function setupEntryForm() {
+function setupEntryForm(isEditing) {
   const form = document.getElementById('entry-form');
   if (!form) return;
   form.querySelectorAll('.mood-opt').forEach(el => {
@@ -1654,13 +1352,13 @@ function setupEntryForm() {
       form.querySelector(`input[name="mood"][value="${mood}"]`).checked = true;
       form.querySelectorAll('.mood-opt').forEach(o => {
         const active = o.dataset.mood === mood;
-        o.style.background = active ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--surface-2)';
+        o.style.background = active ? 'color-mix(in srgb,var(--accent) 20%,transparent)' : 'var(--surface-2)';
         o.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
         o.style.color = active ? 'var(--accent)' : 'var(--text)';
       });
     });
   });
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
     const entry = {
@@ -1670,28 +1368,42 @@ function setupEntryForm() {
     };
     if (!entry.title) return;
     upsertEntry(entry);
-    state.modal = null; render(); toast('Entry saved');
+    closeModal();
+    toast('Entry saved');
+
+    if (!isEditing) {
+      const detected = detectPurchase(entry);
+      if (detected && !state.data.collections.some(c => c.journalEntryId === entry.id)) {
+        const add = await ask({
+          title: 'Looks like a purchase',
+          message: `Add "${detected.name}" (${fmtMoney(detected.price, detected.currency)}) to your collection?`,
+          confirmText: 'Add to collection', cancelText: 'Skip', kind: 'info',
+        });
+        if (add) showModal({ type: 'collection', edit: { ...detected, id: uid() } });
+      }
+    }
   });
 }
 
 function setupTaskForm() {
   const form = document.getElementById('task-form');
   if (!form) return;
+  const toggleBtn = (btn, hiddenName, iconOn, iconOff, labelBase) => {
+    const hidden = form.querySelector(`input[name="${hiddenName}"]`);
+    btn.addEventListener('click', () => {
+      const on = btn.dataset.on !== '1';
+      btn.dataset.on = on ? '1' : '';
+      hidden.value = on ? '1' : '';
+      btn.innerHTML = `${ICON(on?iconOn:iconOff)} ${labelBase} ${on?'on':'off'}`;
+      btn.style.background = on ? 'color-mix(in srgb,var(--accent) 20%,transparent)' : 'var(--surface-2)';
+      btn.style.color = on ? 'var(--accent)' : 'var(--text)';
+      btn.style.borderColor = on ? 'var(--accent)' : 'var(--border)';
+      refreshIcons();
+    });
+  };
+  toggleBtn(form.querySelector('#reminder-btn'), 'reminder', 'bell', 'bell-off', 'Reminder');
+  toggleBtn(form.querySelector('#alarm-btn'), 'alarm', 'volume-2', 'volume-x', 'Alarm');
 
-  // Reminder toggle
-  const reminderBtn = form.querySelector('#task-reminder-btn');
-  const reminderInput = form.querySelector('input[name="reminder"]');
-  reminderBtn.addEventListener('click', () => {
-    const on = reminderInput.value !== '1';
-    reminderInput.value = on ? '1' : '';
-    reminderBtn.innerHTML = `${ICON(on ? 'bell' : 'bell-off')} Reminder ${on ? 'on' : 'off'}`;
-    reminderBtn.style.background = on ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--surface-2)';
-    reminderBtn.style.color = on ? 'var(--accent)' : 'var(--text)';
-    reminderBtn.style.borderColor = on ? 'var(--accent)' : 'var(--border)';
-    refreshIcons();
-  });
-
-  // Recurrence type change
   const recSel = form.querySelector('#recurrence-select');
   const weekly = form.querySelector('#recurrence-weekly');
   const monthly = form.querySelector('#recurrence-monthly');
@@ -1699,100 +1411,136 @@ function setupTaskForm() {
     weekly.style.display = recSel.value === 'weekly' ? 'block' : 'none';
     monthly.style.display = recSel.value === 'monthly' ? 'block' : 'none';
   });
-
-  // Day pill toggles for weekly
   const daysHidden = form.querySelector('input[name="recurrenceDays"]');
   form.querySelectorAll('.day-pill').forEach(p => {
     p.addEventListener('click', () => {
       const d = parseInt(p.dataset.day, 10);
-      const current = daysHidden.value ? daysHidden.value.split(',').filter(Boolean).map(Number) : [];
-      const next = current.includes(d) ? current.filter(x => x !== d) : [...current, d];
+      const cur = daysHidden.value ? daysHidden.value.split(',').filter(Boolean).map(Number) : [];
+      const next = cur.includes(d) ? cur.filter(x => x !== d) : [...cur, d];
       daysHidden.value = next.sort((a,b)=>a-b).join(',');
       p.classList.toggle('active');
     });
   });
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
     const recurrence = fd.get('recurrence') || 'none';
     const daysStr = fd.get('recurrenceDays') || '';
     const recurrenceDays = daysStr ? daysStr.split(',').filter(Boolean).map(Number) : [];
-
-    if (recurrence === 'weekly' && recurrenceDays.length === 0) {
-      toast('Pick at least one day for weekly repeat', 'error');
-      return;
-    }
-
+    if (recurrence === 'weekly' && !recurrenceDays.length) { toast('Pick at least one day', 'error'); return; }
     const task = {
       id: fd.get('id'),
-      dueDate: fd.get('dueDate'),
-      dueTime: fd.get('dueTime'),
-      title: fd.get('title').trim(),
-      description: fd.get('description').trim(),
-      category: fd.get('category'),
-      priority: fd.get('priority'),
+      dueDate: fd.get('dueDate'), dueTime: fd.get('dueTime'),
+      title: fd.get('title').trim(), description: fd.get('description').trim(),
+      category: fd.get('category'), priority: fd.get('priority'),
       completed: fd.get('completed') === '1',
       reminder: fd.get('reminder') === '1',
-      recurrence,
-      recurrenceDays: recurrence === 'weekly' ? recurrenceDays : [],
-      recurrenceDay: recurrence === 'monthly' ? parseInt(fd.get('recurrenceDay') || '1', 10) : null,
+      alarm: fd.get('alarm') === '1',
+      recurrence, recurrenceDays: recurrence==='weekly'?recurrenceDays:[],
+      recurrenceDay: recurrence==='monthly'?parseInt(fd.get('recurrenceDay')||'1',10):null,
       remindedKeys: [],
     };
     if (!task.title) return;
-    upsertTask(task);
-    state.modal = null; render(); toast('Task saved');
+    upsertTask(task); closeModal(); toast('Task saved');
   });
 }
-document.addEventListener('click', (e) => {
+
+function setupCollectionForm() {
+  const form = document.getElementById('coll-form');
+  if (!form) return;
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const item = {
+      id: fd.get('id'),
+      name: fd.get('name').trim(),
+      price: parseFloat(fd.get('price')) || 0,
+      currency: fd.get('currency'),
+      date: fd.get('date'),
+      notes: (fd.get('notes')||'').trim(),
+      journalEntryId: fd.get('journalEntryId') || null,
+    };
+    if (!item.name) return;
+    upsertCollection(item); closeModal(); toast('Added to collection');
+  });
+}
+
+document.addEventListener('click', async (e) => {
   const target = e.target.closest('[data-action]');
   if (!target) return;
   const action = target.dataset.action;
   const id = target.dataset.id;
 
-  // -------- Critical close-modal handling --------
-  // The overlay also has data-action="close-modal", but we only want to
-  // close when the user *clicks the overlay backdrop itself* — not when a
-  // click inside the modal bubbles up to the overlay.
-  if (action === 'close-modal'
-      && target.classList.contains('modal-overlay')
-      && e.target !== target) {
-    return;
-  }
+  if (action === 'close-modal' && target.classList.contains('modal-overlay') && e.target !== target) return;
+  if (action === 'confirm-cancel' && target.classList.contains('modal-overlay') && e.target !== target) return;
+
+  if (alarmInterval && action !== 'confirm-ok' && action !== 'confirm-cancel') stopAlarm();
 
   switch (action) {
-    case 'nav':           setView(target.dataset.view); break;
-    case 'toggle-theme':  updateSettings({ theme: state.data.settings.theme === 'dark' ? 'light' : 'dark' }); break;
-    case 'open-modal':    state.modal = { type: target.dataset.modalType }; render(); break;
-    case 'close-modal':   state.modal = null; render(); break;
-    case 'toggle-task':   toggleTask(id); break;
-    case 'edit-task':     state.modal = { type: 'task', edit: state.data.tasks.find(t => t.id === id) }; render(); break;
-    case 'delete-task':   if (confirm('Delete this task?')) deleteTask(id); break;
-    case 'edit-entry':    state.modal = { type: 'entry', edit: state.data.entries.find(t => t.id === id) }; render(); break;
-    case 'delete-entry':  if (confirm('Delete this entry?')) deleteEntry(id); break;
+    case 'nav': setView(target.dataset.view); break;
+    case 'toggle-theme': updateSettings({ theme: state.data.settings.theme === 'dark' ? 'light' : 'dark' }); break;
+    case 'open-modal': showModal({ type: target.dataset.modalType }); break;
+    case 'close-modal': closeModal(); break;
+    case 'toggle-task': toggleTask(id); break;
+    case 'edit-task': showModal({ type: 'task', edit: state.data.tasks.find(t => t.id === id) }); break;
+    case 'delete-task': {
+      const ok = await ask({ title: 'Delete this task?', message: 'This action cannot be undone.', confirmText: 'Delete', danger: true });
+      if (ok) deleteTask(id);
+      break;
+    }
+    case 'edit-entry': showModal({ type: 'entry', edit: state.data.entries.find(t => t.id === id) }); break;
+    case 'delete-entry': {
+      const ok = await ask({ title: 'Delete this entry?', message: 'This action cannot be undone.', confirmText: 'Delete', danger: true });
+      if (ok) deleteEntry(id);
+      break;
+    }
+    case 'edit-collection': showModal({ type: 'collection', edit: state.data.collections.find(c => c.id === id) }); break;
+    case 'delete-collection': {
+      const ok = await ask({ title: 'Remove from collection?', message: 'This action cannot be undone.', confirmText: 'Remove', danger: true });
+      if (ok) deleteCollection(id);
+      break;
+    }
+    case 'confirm-ok': {
+      const r = state.modal?.resolve; closeModal(); r && r(true); break;
+    }
+    case 'confirm-cancel': {
+      const r = state.modal?.resolve; closeModal(); r && r(false); break;
+    }
     case 'set-task-filter': state.taskFilter = target.dataset.filter; render(); break;
     case 'journal-today': state.journalDate = todayYMD(); render(); break;
-    case 'cal-prev':      state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() - 1, 1); render(); break;
-    case 'cal-next':      state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() + 1, 1); render(); break;
-    case 'cal-select':    state.calendarSelected = target.dataset.date; render(); break;
-    case 'set-theme':     updateSettings({ theme: target.dataset.theme }); break;
-    case 'set-accent':    updateSettings({ accent: target.dataset.accent }); break;
+    case 'journal-clear-date': state.journalDate = ''; render(); break;
+    case 'cal-prev': state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() - 1, 1); render(); break;
+    case 'cal-next': state.calendarCursor = new Date(state.calendarCursor.getFullYear(), state.calendarCursor.getMonth() + 1, 1); render(); break;
+    case 'cal-select': state.calendarSelected = target.dataset.date; render(); break;
+    case 'set-theme': updateSettings({ theme: target.dataset.theme }); break;
+    case 'set-accent': updateSettings({ accent: target.dataset.accent }); break;
     case 'request-notifications': requestNotifications(); break;
-    case 'cat-delete':    if (confirm('Remove this category?')) updateCategories(state.data.categories.filter(c => c.id !== id)); break;
+    case 'cat-delete': {
+      const ok = await ask({ title: 'Remove this category?', message: 'Existing items will keep their category label.', confirmText: 'Remove', danger: true });
+      if (ok) updateCategories(state.data.categories.filter(c => c.id !== id));
+      break;
+    }
     case 'cat-add': {
-      const nameEl = document.getElementById('new-cat-name');
-      const colorEl = document.getElementById('new-cat-color');
-      const name = nameEl.value.trim();
-      if (!name) return;
-      updateCategories([...state.data.categories, { id: uid(), name, color: colorEl.value }]);
-      nameEl.value = '';
+      const n = document.getElementById('new-cat-name'), c = document.getElementById('new-cat-color');
+      const name = n.value.trim(); if (!name) return;
+      updateCategories([...state.data.categories, { id: uid(), name, color: c.value }]);
+      n.value = '';
       break;
     }
     case 'export-ics': {
       const upcoming = state.data.tasks.filter(t => !t.completed);
-      if (upcoming.length === 0) { toast('No tasks to export'); return; }
-      downloadFile('daily-planner.ics', buildICS(upcoming), 'text/calendar');
-      toast('Calendar file downloaded');
+      if (!upcoming.length) { toast('No tasks to export'); return; }
+      downloadFile('daily-planner.ics', buildICS(upcoming, true), 'text/calendar');
+      toast('Calendar file downloaded (includes alarms)');
+      break;
+    }
+    case 'export-collection': {
+      if (!state.data.collections.length) { toast('Collection is empty'); return; }
+      const rows = [['Name','Price','Currency','Date','Notes'], ...state.data.collections.map(c => [c.name, c.price, c.currency, c.date, c.notes||''])];
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+      downloadFile('collection.csv', csv, 'text/csv');
+      toast('Collection exported');
       break;
     }
     case 'export-json': {
@@ -1805,29 +1553,30 @@ document.addEventListener('click', (e) => {
       const input = document.createElement('input');
       input.type = 'file'; input.accept = 'application/json';
       input.onchange = async (ev) => {
-        const file = ev.target.files[0];
-        if (!file) return;
+        const file = ev.target.files[0]; if (!file) return;
         try {
           const text = await file.text();
           const data = JSON.parse(text);
           if (!data.entries || !data.tasks) throw new Error('Invalid file');
-          if (!confirm('This will replace your current data. Continue?')) return;
+          const ok = await ask({ title: 'Replace all data?', message: 'This will overwrite your current data with the backup file.', confirmText: 'Replace', danger: true });
+          if (!ok) return;
           state.data = {
             settings: { ...DEFAULT_SETTINGS, ...(data.settings || {}) },
             categories: data.categories || DEFAULT_CATEGORIES.slice(),
             entries: data.entries, tasks: data.tasks,
+            collections: data.collections || [],
           };
           applyTheme(); await persist(); render(); toast('Backup imported');
-        } catch (err) { alert('Could not read that file.'); }
+        } catch (err) { ask({ title: 'Import failed', message: 'Could not read that file.', confirmText: 'OK', single: true, kind: 'info' }); }
       };
       input.click();
       break;
     }
-    case 'google-signin':       signInWithGoogle(); break;
-    case 'signout':             signOutUser(); break;
-    case 'trigger-install':     triggerInstall(); break;
+    case 'google-signin': signInWithGoogle(); break;
+    case 'signout': signOutUser(); break;
+    case 'trigger-install': triggerInstall(); break;
     case 'hide-install-banner': updateSettings({ hideInstallBanner: true }); break;
-    case 'reload':              location.reload(); break;
+    case 'reload': location.reload(); break;
   }
 });
 
@@ -1838,35 +1587,35 @@ document.addEventListener('input', (e) => {
   const id = target.dataset.id;
   switch (action) {
     case 'set-journal-date': state.journalDate = target.value; render(); break;
-    case 'set-task-cat':     state.taskCatFilter = target.value; render(); break;
-    case 'set-search':       state.search = target.value; render(); break;
-    case 'set-name':         state.data.settings.displayName = target.value; persist(); break;
-    case 'cat-rename':       updateCategories(state.data.categories.map(c => c.id === id ? { ...c, name: target.value } : c)); break;
-    case 'cat-recolor':      updateCategories(state.data.categories.map(c => c.id === id ? { ...c, color: target.value } : c)); break;
+    case 'set-journal-search': state.journalSearch = target.value; render(); break;
+    case 'set-task-cat': state.taskCatFilter = target.value; render(); break;
+    case 'set-coll-sort': state.collectionSort = target.value; render(); break;
+    case 'set-search': state.search = target.value; render(); break;
+    case 'set-name': state.data.settings.displayName = target.value; persist(); break;
+    case 'cat-rename': updateCategories(state.data.categories.map(c => c.id === id ? { ...c, name: target.value } : c)); break;
+    case 'cat-recolor': updateCategories(state.data.categories.map(c => c.id === id ? { ...c, color: target.value } : c)); break;
+    case 'toggle-audio-alarm': updateSettings({ audioAlarm: target.checked }); break;
   }
 });
-async function init() {
-  applyTheme();
-  render();
 
+async function init() {
+  applyTheme(); render();
   if (USE_FIREBASE && !fb) {
     state.bootError = { title: 'Firebase SDK failed to load', message: 'Check your internet connection and reload.', code: (fbInitError && fbInitError.message) || '' };
     state.loaded = true; render(); return;
   }
-
   if (storageMode === 'firebase') {
-    const timeoutId = setTimeout(() => {
+    const tid = setTimeout(() => {
       if (!state.loaded) {
-        state.bootError = { title: 'Firebase didn\'t respond', message: 'Anonymous sign-in might not be enabled, or this page might be opened via file://. Check the console.', code: 'timeout' };
+        state.bootError = { title: 'Firebase didn\'t respond', message: 'Check console — likely Anonymous sign-in not enabled or file:// protocol.', code: 'timeout' };
         state.loaded = true; render();
       }
     }, 8000);
-    try { await initFirebaseAuth(); } finally { clearTimeout(timeoutId); }
+    try { await initFirebaseAuth(); } finally { clearTimeout(tid); }
     return;
   }
-
   const stored = await storageLoad();
-  if (stored) state.data = { ...state.data, ...stored, settings: { ...DEFAULT_SETTINGS, ...(stored.settings || {}) } };
+  if (stored) state.data = { ...state.data, ...stored, settings: { ...DEFAULT_SETTINGS, ...(stored.settings || {}) }, collections: stored.collections || [] };
   applyTheme(); state.loaded = true; render();
 }
 
