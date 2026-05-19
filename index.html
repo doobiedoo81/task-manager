@@ -274,6 +274,7 @@ const DEFAULT_CATEGORIES = [
   { id: 'learn',    name: 'Learning', color: '#C8861D' },
   { id: 'errands',  name: 'Errands',  color: '#D2542F' },
   { id: 'flight',   name: 'Flight',   color: '#1E3A5F' },
+  { id: 'collection', name: 'Collection', color: '#7B3F5C' },
 ];
 const DEFAULT_SETTINGS = {
   theme: 'light', accent: 'coral',
@@ -603,16 +604,24 @@ function startAlarm() {
   if (alarmInterval) return;
   try {
     alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const beep = () => {
+    const tone = (freq, start, dur) => {
       const o = alarmCtx.createOscillator(), g = alarmCtx.createGain();
       o.connect(g); g.connect(alarmCtx.destination);
-      o.frequency.value = 880;
-      g.gain.setValueAtTime(0.25, alarmCtx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, alarmCtx.currentTime + 0.4);
-      o.start(); o.stop(alarmCtx.currentTime + 0.4);
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(0.15, start + 0.04);
+      g.gain.setValueAtTime(0.15, start + dur * 0.6);
+      g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      o.start(start); o.stop(start + dur);
     };
-    beep(); alarmInterval = setInterval(beep, 800);
-    alarmTimeout = setTimeout(stopAlarm, 30000);
+    const chime = () => {
+      const t = alarmCtx.currentTime;
+      tone(880, t, 0.32);          // G5 (ding)
+      tone(659.25, t + 0.38, 0.5); // E5 (dong)
+    };
+    chime();
+    alarmInterval = setInterval(chime, 1600);
+    alarmTimeout = setTimeout(stopAlarm, 20000);
   } catch (e) { console.error('Audio alarm failed:', e); }
 }
 function stopAlarm() {
@@ -655,12 +664,38 @@ function scheduleReminders() {
 }
 
 async function requestNotifications() {
-  if (!('Notification' in window)) { await ask({ title: 'Not supported', message: 'This browser does not support notifications.', confirmText: 'OK', single: true }); return; }
+  if (!('Notification' in window)) {
+    await ask({ title: 'Not supported', message: 'This browser doesn\'t support notifications.', confirmText: 'OK', single: true });
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    updateSettings({ notificationsEnabled: true });
+    toast('Reminders turned on');
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    await ask({
+      title: 'Notifications are blocked',
+      message: 'Your browser previously blocked notifications for this site. Open your browser/site settings (lock icon in address bar → Notifications → Allow), then come back and try again.',
+      confirmText: 'OK', single: true, kind: 'info',
+    });
+    return;
+  }
   const p = await Notification.requestPermission();
   if (p === 'granted') {
     updateSettings({ notificationsEnabled: true });
     try { new Notification('Reminders enabled', { body: 'You\'ll get notifications based on your task category.' }); } catch {}
-  } else toast('Notifications denied');
+  } else {
+    toast('Notifications denied');
+  }
+}
+
+function testNotification() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    toast('Enable notifications first', 'error'); return;
+  }
+  try { new Notification('Test reminder ✓', { body: 'Daily Planner notifications are working.' }); }
+  catch (e) { toast('Failed: ' + e.message, 'error'); }
 }
 
 document.addEventListener('visibilitychange', () => { if (!document.hidden && state.loaded) scheduleReminders(); });
@@ -1125,10 +1160,14 @@ function renderSettings() {
       <div style="background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,var(--border));border-radius:8px;padding:12px;font-size:12px;color:var(--text);line-height:1.6;margin-bottom:12px">
         <strong>${ICON('info')} For reliable alarms when the app is closed:</strong> Use the <strong>"Export .ics"</strong> button on the Tasks page. Import the file into your phone's calendar — it includes proper alarm triggers that your OS will fire even with Daily closed.
       </div>
-      <button class="btn ${s.notificationsEnabled && np==='granted'?'btn-ghost':'btn-primary'}" ${s.notificationsEnabled && np==='granted'?'disabled':''} data-action="request-notifications">
-        ${s.notificationsEnabled && np==='granted' ? `${ICON('check')} In-app notifications enabled` : `${ICON('bell')} Enable in-app notifications`}
-      </button>
-      ${np === 'denied' ? `<div style="font-size:12px;color:var(--danger);margin-top:10px">Notifications are blocked. Enable in browser settings.</div>` : ''}
+      ${(() => {
+        if (np === 'unsupported') return `<div style="font-size:12px;color:var(--danger)">This browser doesn't support notifications.</div>`;
+        if (np === 'denied') return `<button class="btn btn-ghost" data-action="request-notifications">${ICON('bell-off')} Permission blocked — tap for help</button>`;
+        if (np === 'default') return `<button class="btn btn-primary" data-action="request-notifications">${ICON('bell')} Enable notifications</button>`;
+        if (!s.notificationsEnabled) return `<button class="btn btn-primary" data-action="request-notifications">${ICON('bell')} Turn on reminders</button>`;
+        return `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost" disabled>${ICON('check')} Reminders on</button><button class="btn btn-ghost" data-action="test-notification">${ICON('send')} Send test</button></div>`;
+      })()}
+      <div class="mono" style="font-size:11px;color:var(--text-faint);margin-top:10px">browser: ${np} · app: ${s.notificationsEnabled?'on':'off'}${isIOS()&&!isStandaloneInstalled()?' · iOS: install as PWA first':''}</div>
       <div class="field" style="margin-top:14px;margin-bottom:0">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:normal;font-size:13px">
           <input type="checkbox" ${s.audioAlarm?'checked':''} data-action="toggle-audio-alarm" />
@@ -1371,7 +1410,7 @@ function setupEntryForm(isEditing) {
     closeModal();
     toast('Entry saved');
 
-    if (!isEditing) {
+    if (!isEditing && entry.category === 'collection') {
       const detected = detectPurchase(entry);
       if (detected && !state.data.collections.some(c => c.journalEntryId === entry.id)) {
         const add = await ask({
@@ -1516,6 +1555,7 @@ document.addEventListener('click', async (e) => {
     case 'set-theme': updateSettings({ theme: target.dataset.theme }); break;
     case 'set-accent': updateSettings({ accent: target.dataset.accent }); break;
     case 'request-notifications': requestNotifications(); break;
+    case 'test-notification': testNotification(); break;
     case 'cat-delete': {
       const ok = await ask({ title: 'Remove this category?', message: 'Existing items will keep their category label.', confirmText: 'Remove', danger: true });
       if (ok) updateCategories(state.data.categories.filter(c => c.id !== id));
