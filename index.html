@@ -882,6 +882,11 @@ function renderDashboard() {
     ${tomorrowTasks.length === 0 ? `<div class="empty"><div class="desc">Tomorrow's blank — tap + to plan ahead.</div></div>` : `<div class="stack-sm">${tomorrowTasks.map(x=>taskRowHTML(x,true)).join('')}</div>`}
   </section>
 
+  <section class="card anim-slide">
+    <header><div><h3>Today's journal</h3><div class="sub">${todayEntries.length} ${todayEntries.length===1?'entry':'entries'}</div></div><button class="card-link" data-action="nav" data-view="journal">Open journal →</button></header>
+    ${todayEntries.length === 0 ? `<div class="empty"><div class="desc">No entries today. Tap + to log something.</div></div>` : `<div class="stack-sm">${todayEntries.slice(0,3).map(entryCardHTML).join('')}</div>`}
+  </section>
+
   ${(() => {
         const recap = getOnThisDay();
         if (!recap.length) return '';
@@ -899,13 +904,11 @@ function renderDashboard() {
           <div class="stack-sm">${recap.slice(0,3).map(r => recapRowHTML(r)).join('')}</div>
         </section>`;
       })()}
-
-  <section class="card anim-slide">
-    <header><div><h3>Today's journal</h3><div class="sub">${todayEntries.length} ${todayEntries.length===1?'entry':'entries'}</div></div><button class="card-link" data-action="nav" data-view="journal">Open journal →</button></header>
-    ${todayEntries.length === 0 ? `<div class="empty"><div class="desc">No entries today. Tap + to log something.</div></div>` : `<div class="stack-sm">${todayEntries.slice(0,3).map(entryCardHTML).join('')}</div>`}
-  </section>
+      
 </div>`;
 }
+
+
 
 function statCard(icon, label, value, sub, delay) {
   return `<div class="stat-card anim-slide" style="animation-delay:${delay}s"><div class="label">${ICON(icon)} ${esc(label)}</div><div class="value display">${esc(String(value))}</div><div class="sub">${esc(sub)}</div></div>`;
