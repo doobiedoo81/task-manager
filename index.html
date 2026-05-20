@@ -281,7 +281,6 @@ const DEFAULT_SETTINGS = {
   notificationsEnabled: false,
   displayName: '',
   hideInstallBanner: false,
-  audioAlarm: true,
 };
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const DAY_NAMES_SHORT = ['S','M','T','W','T','F','S'];
@@ -597,39 +596,6 @@ async function triggerInstall() {
   }
   showModal({ type: 'install' });
 }
-
-let alarmCtx = null, alarmInterval = null, alarmTimeout = null;
-function startAlarm() {
-  if (!state.data.settings.audioAlarm) return;
-  if (alarmInterval) return;
-  try {
-    alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const tone = (freq, start, dur) => {
-      const o = alarmCtx.createOscillator(), g = alarmCtx.createGain();
-      o.connect(g); g.connect(alarmCtx.destination);
-      o.type = 'sine'; o.frequency.value = freq;
-      g.gain.setValueAtTime(0, start);
-      g.gain.linearRampToValueAtTime(0.15, start + 0.04);
-      g.gain.setValueAtTime(0.15, start + dur * 0.6);
-      g.gain.exponentialRampToValueAtTime(0.001, start + dur);
-      o.start(start); o.stop(start + dur);
-    };
-    const chime = () => {
-      const t = alarmCtx.currentTime;
-      tone(880, t, 0.32);          // G5 (ding)
-      tone(659.25, t + 0.38, 0.5); // E5 (dong)
-    };
-    chime();
-    alarmInterval = setInterval(chime, 1600);
-    alarmTimeout = setTimeout(stopAlarm, 20000);
-  } catch (e) { console.error('Audio alarm failed:', e); }
-}
-function stopAlarm() {
-  if (alarmInterval) clearInterval(alarmInterval); alarmInterval = null;
-  if (alarmTimeout) clearTimeout(alarmTimeout); alarmTimeout = null;
-  if (alarmCtx) { alarmCtx.close().catch(()=>{}); alarmCtx = null; }
-}
-
 let reminderTimers = [];
 function scheduleReminders() {
   reminderTimers.forEach(clearTimeout);
@@ -653,7 +619,6 @@ function scheduleReminders() {
             if (!cur || cur.completed) return;
             const label = offset === 0 ? 'Due now' : offset >= 180 ? 'Due in 3 hours' : offset >= 60 ? `Due in ${offset/60} hour${offset>60?'s':''}` : `Due in ${offset} minutes`;
             try { new Notification(label + ': ' + task.title, { body: task.description || `${fmtDate(task.dueDate,'short')} at ${fmtTime(task.dueTime)}`, tag: `${task.id}-${key}`, renotify: true }); } catch (e) { console.error(e); }
-            if (task.alarm) startAlarm();
             state.data.tasks = state.data.tasks.map(t => t.id === task.id ? { ...t, remindedKeys: [...(t.remindedKeys || []), key] } : t);
             persist();
           }, delta);
@@ -712,6 +677,12 @@ function ask({ title, message, confirmText = 'Confirm', cancelText = 'Cancel', d
 }
 
 function render() {
+  // Save focus before re-render
+  const a = document.activeElement;
+  const refocus = a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA') && a.dataset?.action
+    ? { action: a.dataset.action, id: a.dataset.id || '', start: a.selectionStart, end: a.selectionEnd }
+    : null;
+
   const app = document.getElementById('app');
 
   if (!state.loaded) {
@@ -756,6 +727,20 @@ function render() {
   renderModal();
   refreshIcons();
   scheduleReminders();
+
+  // Restore focus after re-render
+  if (refocus) {
+    const sel = refocus.id
+      ? `[data-action="${refocus.action}"][data-id="${refocus.id}"]`
+      : `[data-action="${refocus.action}"]`;
+    const el = document.querySelector(sel);
+    if (el && typeof el.focus === 'function') {
+      el.focus();
+      if (typeof refocus.start === 'number') {
+        try { el.setSelectionRange(refocus.start, refocus.end); } catch {}
+      }
+    }
+  }
 }
 
 function renderSignInGate() {
@@ -971,7 +956,6 @@ function taskRowHTML(task, compact) {
         ${task.dueTime ? `<span class="meta mono">${ICON(isFlight?'plane':'clock')} ${esc(fmtTime(task.dueTime))}</span>` : ''}
         ${cat ? `<span class="chip" style="background:${cat.color}20;color:${cat.color}"><span class="dot" style="background:${cat.color}"></span>${esc(cat.name)}</span>` : ''}
         ${task.reminder && !task.completed ? `<span style="color:var(--accent);display:inline-flex" title="Reminder set">${ICON('bell')}</span>` : ''}
-        ${task.alarm && !task.completed ? `<span style="color:var(--accent);display:inline-flex" title="Alarm sound on">${ICON('volume-2')}</span>` : ''}
         ${rec ? `<span class="meta" style="color:var(--accent)">${ICON('repeat')} ${esc(rec)}</span>` : ''}
         ${od ? `<span style="font-size:11px;font-weight:700;color:#D2542F">OVERDUE</span>` : ''}
       </div>
@@ -1168,12 +1152,6 @@ function renderSettings() {
         return `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost" disabled>${ICON('check')} Reminders on</button><button class="btn btn-ghost" data-action="test-notification">${ICON('send')} Send test</button></div>`;
       })()}
       <div class="mono" style="font-size:11px;color:var(--text-faint);margin-top:10px">browser: ${np} · app: ${s.notificationsEnabled?'on':'off'}${isIOS()&&!isStandaloneInstalled()?' · iOS: install as PWA first':''}</div>
-      <div class="field" style="margin-top:14px;margin-bottom:0">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:normal;font-size:13px">
-          <input type="checkbox" ${s.audioAlarm?'checked':''} data-action="toggle-audio-alarm" />
-          Play alarm sound when reminders fire (and task has alarm on)
-        </label>
-      </div>
     </div>
 
     <div class="card"><header><h3>Categories</h3></header>
@@ -1292,7 +1270,7 @@ function renderModal() {
 
   if (state.modal.type === 'task') {
     const editing = state.modal.edit;
-    const d = editing || { id: uid(), dueDate: tomorrowYMD(), dueTime: '', title: '', description: '', category: state.data.categories[0]?.id || 'work', priority: 'medium', completed: false, reminder: false, alarm: false, recurrence: 'none', recurrenceDays: [], recurrenceDay: 1 };
+    const d = editing || { id: uid(), dueDate: tomorrowYMD(), dueTime: '', title: '', description: '', category: state.data.categories[0]?.id || 'work', priority: 'medium', completed: false, reminder: false, recurrence: 'none', recurrenceDays: [], recurrenceDay: 1 };
     const rec = d.recurrence || 'none';
     const recDays = d.recurrenceDays || [];
     root.innerHTML = `<div class="modal-overlay" data-action="close-modal">
@@ -1333,11 +1311,11 @@ function renderModal() {
             <label>Day of month</label>
             <input class="input" type="number" min="1" max="31" name="recurrenceDay" value="${d.recurrenceDay||1}" />
           </div>
-          <div class="field"><label>Notifications</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button type="button" id="reminder-btn" data-on="${d.reminder?'1':''}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;background:${d.reminder?'color-mix(in srgb,var(--accent) 20%,transparent)':'var(--surface-2)'};color:${d.reminder?'var(--accent)':'var(--text)'};border:1px solid ${d.reminder?'var(--accent)':'var(--border)'}">${ICON(d.reminder?'bell':'bell-off')} Reminder ${d.reminder?'on':'off'}</button>
-              <button type="button" id="alarm-btn" data-on="${d.alarm?'1':''}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;background:${d.alarm?'color-mix(in srgb,var(--accent) 20%,transparent)':'var(--surface-2)'};color:${d.alarm?'var(--accent)':'var(--text)'};border:1px solid ${d.alarm?'var(--accent)':'var(--border)'}">${ICON(d.alarm?'volume-2':'volume-x')} Alarm ${d.alarm?'on':'off'}</button>
-            </div>
+          <div class="field"><label>Reminder</label>
+            <button type="button" id="reminder-btn" data-on="${d.reminder?'1':''}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;background:${d.reminder?'color-mix(in srgb,var(--accent) 20%,transparent)':'var(--surface-2)'};color:${d.reminder?'var(--accent)':'var(--text)'};border:1px solid ${d.reminder?'var(--accent)':'var(--border)'}">${ICON(d.reminder?'bell':'bell-off')} Reminder ${d.reminder?'on':'off'}</button>
+            <input type="hidden" name="reminder" value="${d.reminder?'1':''}" />
+            <div class="hint">Notifications fire at the offsets shown in Settings.</div>
+          </div>
             <input type="hidden" name="reminder" value="${d.reminder?'1':''}" />
             <input type="hidden" name="alarm" value="${d.alarm?'1':''}" />
             <div class="hint">Alarm plays a 30s beep when the reminder fires (in-app only).</div>
@@ -1441,8 +1419,6 @@ function setupTaskForm() {
     });
   };
   toggleBtn(form.querySelector('#reminder-btn'), 'reminder', 'bell', 'bell-off', 'Reminder');
-  toggleBtn(form.querySelector('#alarm-btn'), 'alarm', 'volume-2', 'volume-x', 'Alarm');
-
   const recSel = form.querySelector('#recurrence-select');
   const weekly = form.querySelector('#recurrence-weekly');
   const monthly = form.querySelector('#recurrence-monthly');
@@ -1475,7 +1451,6 @@ function setupTaskForm() {
       category: fd.get('category'), priority: fd.get('priority'),
       completed: fd.get('completed') === '1',
       reminder: fd.get('reminder') === '1',
-      alarm: fd.get('alarm') === '1',
       recurrence, recurrenceDays: recurrence==='weekly'?recurrenceDays:[],
       recurrenceDay: recurrence==='monthly'?parseInt(fd.get('recurrenceDay')||'1',10):null,
       remindedKeys: [],
@@ -1513,9 +1488,6 @@ document.addEventListener('click', async (e) => {
 
   if (action === 'close-modal' && target.classList.contains('modal-overlay') && e.target !== target) return;
   if (action === 'confirm-cancel' && target.classList.contains('modal-overlay') && e.target !== target) return;
-
-  if (alarmInterval && action !== 'confirm-ok' && action !== 'confirm-cancel') stopAlarm();
-
   switch (action) {
     case 'nav': setView(target.dataset.view); break;
     case 'toggle-theme': updateSettings({ theme: state.data.settings.theme === 'dark' ? 'light' : 'dark' }); break;
@@ -1634,7 +1606,6 @@ document.addEventListener('input', (e) => {
     case 'set-name': state.data.settings.displayName = target.value; persist(); break;
     case 'cat-rename': updateCategories(state.data.categories.map(c => c.id === id ? { ...c, name: target.value } : c)); break;
     case 'cat-recolor': updateCategories(state.data.categories.map(c => c.id === id ? { ...c, color: target.value } : c)); break;
-    case 'toggle-audio-alarm': updateSettings({ audioAlarm: target.checked }); break;
   }
 });
 
