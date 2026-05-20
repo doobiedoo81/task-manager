@@ -337,12 +337,11 @@ function describeRecurrence(t) {
     return 'Weekly · ' + [...days].sort().map(d => DAY_NAMES[d]).join(', ');
   }
   if (t.recurrence === 'monthly') return `Monthly · day ${t.recurrenceDay || 1}`;
-  return '';
   if (t.recurrence === 'annually') {
     const d = new Date(t.dueDate + 'T00:00:00');
     return `Annually · ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
   }
-  }
+  return '';
 }
 
   function getOnThisDay() {
@@ -385,11 +384,10 @@ function nextDueDate(t) {
     cur.setDate(1); cur.setMonth(cur.getMonth() + 1);
     cur.setDate(Math.min(td, daysInMonth(cur)));
     return ymd(cur);
+  }
   if (t.recurrence === 'annually') {
-    const cur = new Date(t.dueDate + 'T00:00:00');
     cur.setFullYear(cur.getFullYear() + 1);
     return ymd(cur);
-  }
   }
   return t.dueDate;
 }
