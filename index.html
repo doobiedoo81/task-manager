@@ -904,7 +904,9 @@ function renderDashboard() {
         return `<section class="card anim-slide" style="border:1px solid color-mix(in srgb,var(--accent) 30%,var(--border));background:linear-gradient(135deg,var(--surface) 0%,color-mix(in srgb,var(--accent) 4%,var(--surface)) 100%)">
           <header>
             <div>
-              <h3>${ICON('rewind')} On this day</h3>
+              <h3 style="display: inline-flex; align-items: center; gap: 6px; margin: 0;">
+                ${ICON('rewind')} On this day
+              </h3>
               <div class="sub">${esc(yearLabel)}</div>
             </div>
             <button class="card-link" data-action="open-recap">View all →</button>
