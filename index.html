@@ -1421,10 +1421,6 @@ function renderModal() {
             <input type="hidden" name="reminder" value="${d.reminder?'1':''}" />
             <div class="hint">Notifications fire at the offsets shown in Settings.</div>
           </div>
-            <input type="hidden" name="reminder" value="${d.reminder?'1':''}" />
-            <input type="hidden" name="alarm" value="${d.alarm?'1':''}" />
-            <div class="hint">Alarm plays a 30s beep when the reminder fires (in-app only).</div>
-          </div>
           <div class="footer-row">
             <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
             <button type="submit" class="btn btn-primary">${editing?'Save':'Add task'}</button>
