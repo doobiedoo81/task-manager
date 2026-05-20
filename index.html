@@ -489,6 +489,18 @@ function toggleTask(id) {
   }
   persist(); render();
 }
+function snoozeTask(id) {
+  const t = state.data.tasks.find(x => x.id === id);
+  if (!t) return;
+  const d = new Date(t.dueDate + 'T00:00:00');
+  d.setDate(d.getDate() + 1);
+  const next = ymd(d);
+  state.data.tasks = state.data.tasks.map(x =>
+    x.id === id ? { ...x, dueDate: next, remindedKeys: [] } : x
+  );
+  persist(); render();
+  toast(`Snoozed to ${fmtDate(next, 'medium')}`);
+}
 function upsertCollection(c) {
   const i = state.data.collections.findIndex(x => x.id === c.id);
   if (i >= 0) state.data.collections[i] = c; else state.data.collections.push(c);
@@ -961,7 +973,11 @@ function taskRowHTML(task, compact) {
       </div>
       ${!compact && task.description ? `<div class="desc">${esc(task.description)}</div>` : ''}
     </div>
-    ${!compact ? `<div class="actions"><button data-action="edit-task" data-id="${task.id}">${ICON('edit-3')}</button><button data-action="delete-task" data-id="${task.id}">${ICON('trash-2')}</button></div>` : ''}
+    ${!compact ? `<div class="actions">
+        ${od ? `<button data-action="snooze-task" data-id="${task.id}" title="Snooze +1 day" style="color:var(--accent)">${ICON('clock')}</button>` : ''}
+        <button data-action="edit-task" data-id="${task.id}">${ICON('edit-3')}</button>
+        <button data-action="delete-task" data-id="${task.id}">${ICON('trash-2')}</button>
+      </div>` : ''}
   </div>`;
 }
 
@@ -1494,6 +1510,7 @@ document.addEventListener('click', async (e) => {
     case 'open-modal': showModal({ type: target.dataset.modalType }); break;
     case 'close-modal': closeModal(); break;
     case 'toggle-task': toggleTask(id); break;
+    case 'snooze-task': snoozeTask(id); break;
     case 'edit-task': showModal({ type: 'task', edit: state.data.tasks.find(t => t.id === id) }); break;
     case 'delete-task': {
       const ok = await ask({ title: 'Delete this task?', message: 'This action cannot be undone.', confirmText: 'Delete', danger: true });
