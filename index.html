@@ -340,6 +340,30 @@ function describeRecurrence(t) {
   return '';
 }
 
+  function getOnThisDay() {
+  const today = new Date();
+  const m = today.getMonth();
+  const d = today.getDate();
+  const thisYear = today.getFullYear();
+
+  const matches = (date) => {
+    const dt = new Date(date + 'T00:00:00');
+    return dt.getMonth() === m && dt.getDate() === d && dt.getFullYear() < thisYear;
+  };
+
+  const entries = state.data.entries.filter(e => matches(e.date));
+  const tasks   = state.data.tasks.filter(t => t.completed && matches(t.dueDate));
+  const items   = state.data.collections.filter(c => matches(c.date));
+
+  const all = [
+    ...entries.map(e => ({ kind: 'entry', date: e.date, data: e })),
+    ...tasks.map(t   => ({ kind: 'task',  date: t.dueDate, data: t })),
+    ...items.map(c   => ({ kind: 'coll',  date: c.date, data: c })),
+  ].sort((a,b) => b.date.localeCompare(a.date));
+
+  return all;
+}
+
 function nextDueDate(t) {
   const cur = new Date(t.dueDate + 'T00:00:00');
   if (t.recurrence === 'daily') { cur.setDate(cur.getDate() + 1); return ymd(cur); }
@@ -858,6 +882,24 @@ function renderDashboard() {
     ${tomorrowTasks.length === 0 ? `<div class="empty"><div class="desc">Tomorrow's blank — tap + to plan ahead.</div></div>` : `<div class="stack-sm">${tomorrowTasks.map(x=>taskRowHTML(x,true)).join('')}</div>`}
   </section>
 
+  ${(() => {
+        const recap = getOnThisDay();
+        if (!recap.length) return '';
+        const yearsAgo = [...new Set(recap.map(r => new Date(r.date).getFullYear()))].sort((a,b) => b-a);
+        const now = new Date().getFullYear();
+        const yearLabel = yearsAgo.map(y => `${now - y} year${now-y === 1 ? '' : 's'} ago`).join(' · ');
+        return `<section class="card anim-slide" style="border:1px solid color-mix(in srgb,var(--accent) 30%,var(--border));background:linear-gradient(135deg,var(--surface) 0%,color-mix(in srgb,var(--accent) 4%,var(--surface)) 100%)">
+          <header>
+            <div>
+              <h3>${ICON('rewind')} On this day</h3>
+              <div class="sub">${esc(yearLabel)}</div>
+            </div>
+            <button class="card-link" data-action="open-recap">View all →</button>
+          </header>
+          <div class="stack-sm">${recap.slice(0,3).map(r => recapRowHTML(r)).join('')}</div>
+        </section>`;
+      })()}
+
   <section class="card anim-slide">
     <header><div><h3>Today's journal</h3><div class="sub">${todayEntries.length} ${todayEntries.length===1?'entry':'entries'}</div></div><button class="card-link" data-action="nav" data-view="journal">Open journal →</button></header>
     ${todayEntries.length === 0 ? `<div class="empty"><div class="desc">No entries today. Tap + to log something.</div></div>` : `<div class="stack-sm">${todayEntries.slice(0,3).map(entryCardHTML).join('')}</div>`}
@@ -921,7 +963,27 @@ function entryCardHTML(e) {
     </div>
   </article>`;
 }
-
+function recapRowHTML(r) {
+  const yearsAgo = new Date().getFullYear() - new Date(r.date).getFullYear();
+  const title = r.data.title || r.data.name;
+  const cat = state.data.categories.find(c => c.id === r.data.category);
+  const mood = MOODS.find(m => m.id === r.data.mood);
+  return `<div class="task-row" style="border-left-color:var(--accent)">
+    <div class="mono" style="min-width:64px;font-size:11px;color:var(--accent);font-weight:700;padding-top:2px">
+      ${yearsAgo}Y AGO
+    </div>
+    <div class="body">
+      <div class="title-line">
+        <span class="chip" style="background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)">${r.kind === 'task' ? 'Task' : r.kind === 'coll' ? 'Collection' : 'Journal'}</span>
+        ${cat ? `<span class="chip" style="background:${cat.color}20;color:${cat.color}"><span class="dot" style="background:${cat.color}"></span>${esc(cat.name)}</span>` : ''}
+        ${mood ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text-dim)">${ICON(mood.icon)} ${esc(mood.label)}</span>` : ''}
+        ${r.kind === 'coll' ? `<span class="mono" style="font-size:12px;color:var(--accent);font-weight:600">${fmtMoney(r.data.price, r.data.currency)}</span>` : ''}
+      </div>
+      <div style="font-size:15px;font-weight:500;margin-top:2px">${esc(title)}</div>
+      ${r.data.description || r.data.notes ? `<div class="desc">${esc(r.data.description || r.data.notes)}</div>` : ''}
+    </div>
+  </div>`;
+}
 function renderTasks() {
   const today = todayYMD(), tm = tomorrowYMD();
   let list = state.data.tasks.slice();
@@ -1199,6 +1261,30 @@ function renderSettings() {
 function renderModal() {
   const root = document.getElementById('modal-root');
   if (!state.modal) { root.innerHTML = ''; return; }
+
+  if (state.modal.type === 'recap') {
+    const recap = getOnThisDay();
+    const byYear = {};
+    recap.forEach(r => { const y = new Date(r.date).getFullYear(); (byYear[y] = byYear[y] || []).push(r); });
+    const years = Object.keys(byYear).sort((a,b) => b-a);
+    root.innerHTML = `<div class="modal-overlay" data-action="close-modal">
+      <div class="modal" style="max-width:600px">
+        <header>
+          <h2>${ICON('rewind')} On this day</h2>
+          <button data-action="close-modal" style="padding:6px;color:var(--text-dim)">${ICON('x')}</button>
+        </header>
+        <div class="body">
+          ${recap.length === 0 ? `<div class="empty"><div class="desc">No memories from this date in previous years yet.</div></div>`
+          : years.map(y => `<div style="margin-bottom:24px">
+              <div class="date-header"><span>${esc(y)} · ${new Date().getFullYear() - y} year${new Date().getFullYear() - y === 1 ? '' : 's'} ago</span><span></span><span>${byYear[y].length}</span></div>
+              <div class="stack-sm">${byYear[y].map(recapRowHTML).join('')}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+    refreshIcons();
+    return;
+  }
 
   if (state.modal.type === 'confirm') {
     const m = state.modal;
@@ -1511,6 +1597,7 @@ document.addEventListener('click', async (e) => {
     case 'close-modal': closeModal(); break;
     case 'toggle-task': toggleTask(id); break;
     case 'snooze-task': snoozeTask(id); break;
+    case 'open-recap': showModal({ type: 'recap' }); break;
     case 'edit-task': showModal({ type: 'task', edit: state.data.tasks.find(t => t.id === id) }); break;
     case 'delete-task': {
       const ok = await ask({ title: 'Delete this task?', message: 'This action cannot be undone.', confirmText: 'Delete', danger: true });
